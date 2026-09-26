@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # WeatherGuard AI — SIH 2026 · Team Nex_GenX
 
 Physics-informed edge intelligence for IMD Automatic Weather Station anomaly detection.
@@ -21,6 +20,3 @@ cd frontend && npm install && npm run dev          # http://localhost:5173
 Retraining the models needs the full `backend/requirements.txt` (PyTorch): `python -m app.ml.train_gnn && python -m app.ml.train && python -m app.ml.export_onnx`.
 
 Streaming tier: `docker compose --profile streaming up` (Redpanda + TimescaleDB + station producer + QC worker).
-=======
-# SIH-PROTOTYPE
->>>>>>> bfdb6176a1e146d22ed9aec4670176ba36aa28c8
