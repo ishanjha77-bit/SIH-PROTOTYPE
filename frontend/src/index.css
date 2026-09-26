@@ -190,6 +190,13 @@ input[type="range"].wg-range::-moz-range-thumb { width: 11px; height: 11px; bord
 .nav-link::after { content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 1px; background: var(--ink); transform: scaleX(0); transform-origin: left; transition: transform .25s var(--ease-out); }
 .nav-link[aria-current="page"]::after { transform: scaleX(1); }
 
+/* A brief invitation: three soft rings from a call to action, then stillness. Paused while the intro plays. */
+.attention { position: relative; }
+.attention::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+  animation: attention 1.6s var(--ease-out) 1s 3; }
+@keyframes attention { from { box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 55%, transparent); } to { box-shadow: 0 0 0 12px transparent; } }
+html.intro-hold .attention::after { animation-play-state: paused; }
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; }
 }

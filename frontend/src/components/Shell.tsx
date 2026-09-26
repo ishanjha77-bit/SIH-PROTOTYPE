@@ -1,4 +1,5 @@
 import { Menu, Moon, Pause, Play, RotateCcw, Sun } from 'lucide-react'
+import { useTourSeen } from '../lib/tourSeen'
 import { useState } from 'react'
 import { STEPS, isFault } from '../engine/engine'
 import { intro } from '../intro/store'
@@ -60,6 +61,7 @@ export function Clock() {
 
 export function TopNav() {
   const { view, setView, setTour, engine, k } = useConsole()
+  const tourSeen = useTourSeen()
   const [menu, setMenu] = useState(false)
   const faults = engine.OUT[k].filter((d) => isFault(d.cls)).length
   const go = (v: View) => { setView(v); setMenu(false) }
@@ -68,10 +70,10 @@ export function TopNav() {
       <div className="mx-auto flex h-14 max-w-[1240px] items-center gap-8 px-5 sm:px-8">
         <button type="button" onClick={() => go('overview')} className="shrink-0 rounded-md" aria-label="WeatherGuard, overview"><Logo /></button>
 
-        <nav aria-label="Sections" className="hidden h-full items-center gap-6 lg:flex">
+        <nav aria-label="Sections" className="hidden h-full items-center gap-5 lg:flex">
           {NAV.map((n) => (
             <button key={n.id} type="button" onClick={() => go(n.id)} aria-current={view === n.id ? 'page' : undefined}
-              className={cx('nav-link flex h-full items-center text-[14px] transition-colors duration-150', view === n.id ? 'text-ink' : 'text-muted hover:text-ink')}>
+              className={cx('nav-link flex h-full items-center whitespace-nowrap text-[14px] transition-colors duration-150', view === n.id ? 'text-ink' : 'text-muted hover:text-ink')}>
               {n.label}
               {n.id === 'maintenance' && faults > 0 && <span className="tnum ml-1.5 text-[12px] text-fault">{faults}</span>}
             </button>
@@ -79,9 +81,13 @@ export function TopNav() {
         </nav>
 
         <div className="ml-auto flex items-center gap-5">
-          <span className="hidden xl:inline-flex"><EngineStatus /></span>
+          <span className="hidden whitespace-nowrap 2xl:inline-flex"><EngineStatus /></span>
           <span className="hidden sm:inline-flex"><Clock /></span>
-          <button type="button" onClick={() => setTour(0)} className="hidden text-[14px] text-ink-2 transition-colors hover:text-ink lg:inline">Tour</button>
+          <button type="button" onClick={() => setTour(0)}
+            className="hidden h-8 items-center gap-2 whitespace-nowrap rounded-md border border-ink/80 px-3 text-[13.5px] font-medium text-ink transition-colors duration-150 hover:bg-ink hover:text-bg lg:inline-flex">
+            {!tourSeen && <span className="breathe h-1.5 w-1.5 rounded-full bg-accent" aria-hidden="true" />}
+            <Play size={11} fill="currentColor" />Guided demo
+          </button>
           <span className="hidden lg:inline-flex"><ThemeButton /></span>
           <IconButton label="Menu" onClick={() => setMenu(true)} className="lg:hidden"><Menu size={18} /></IconButton>
         </div>
@@ -100,7 +106,7 @@ export function TopNav() {
         <div className="mt-6 flex flex-wrap items-center justify-between gap-4">
           <div className="flex flex-col gap-1.5"><Clock /><EngineStatus long /></div>
           <div className="flex items-center gap-1">
-            <button type="button" onClick={() => { setMenu(false); setTour(0) }} className="mr-3 text-[14px] text-accent">Take the tour</button>
+            <button type="button" onClick={() => { setMenu(false); setTour(0) }} className="mr-3 inline-flex items-center gap-1.5 text-[14px] font-medium text-accent"><Play size={11} fill="currentColor" />Guided demo</button>
             <ThemeButton />
           </div>
         </div>

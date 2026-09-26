@@ -1,4 +1,5 @@
-import { ArrowLeft, ArrowRight, X } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Play, X } from 'lucide-react'
+import { markTourSeen, useTourSeen } from '../lib/tourSeen'
 import { useEffect } from 'react'
 import { stationIndex } from '../engine/engine'
 import { useConsole, type View } from '../state/console'
@@ -14,7 +15,7 @@ const STEPS: Step[] = [
   { view: 'station', k: 146, st: 'mahabaleshwar', title: 'Fix it before it fails', body: 'Mahabaleshwar\'s battery is draining faster than the rest of the network. WeatherGuard predicts when readings will go bad and raises a work order hours before any data is corrupted.' },
   { view: 'evaluation', k: 287, title: 'Measured, not claimed', body: 'Every flag is scored against faults injected at known times. Over three days WeatherGuard catches far more faulty readings than legacy QC with zero false alarms, and beats Isolation Forest, LOF and One-Class SVM trained on the same data.' },
   { view: 'maintenance', k: 287, title: 'From anomaly to action', body: 'Work orders name the root cause and the spare parts to carry. A shift report is written for the forecaster, and clean data exports as NetCDF, CSV or JSON with WMO quality flags for NWP models.' },
-  { view: 'lab', k: 150, title: 'Your turn', body: 'Break any station yourself. Pick a failure, press play, and watch the pipeline find it. The models run on ONNX Runtime, the same 22–107 KB files an edge device would run.' },
+  { view: 'overview', k: 155, title: 'Your turn', body: 'Pick any station on the map and press Simulate sensor fault. Watch the reading go bad, the five checks run one by one, and the decision land. It is computed live by the same ONNX models an edge device would run.' },
 ]
 
 export function Tour() {
@@ -23,6 +24,7 @@ export function Tour() {
 
   useEffect(() => {
     if (!step) return
+    markTourSeen()
     if (playing) toggle()
     setView(step.view)
     setK(step.k)
@@ -68,5 +70,16 @@ export function TourButton() {
   const { setTour } = useConsole()
   return (
     <Button variant="secondary" onClick={() => setTour(0)}>Take the tour</Button>
+  )
+}
+
+/** The main invitation to the tour: a solid button, with a brief pulse until the tour has been taken once. */
+export function TourCTA() {
+  const { setTour } = useConsole()
+  const seen = useTourSeen()
+  return (
+    <Button variant="primary" onClick={() => setTour(0)} className={seen ? undefined : 'attention'} icon={<Play size={13} fill="currentColor" />}>
+      Start the guided demo <span className="ml-1 font-normal opacity-60">2 min</span>
+    </Button>
   )
 }
