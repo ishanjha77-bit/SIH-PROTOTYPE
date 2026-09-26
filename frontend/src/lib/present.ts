@@ -53,6 +53,11 @@ export const clock = (k: number) => {
 export const dayOf = (k: number) => Math.floor(k / 96) + 1
 export const stamp = (k: number) => `Day ${dayOf(k)} · ${clock(k)}`
 export const pct = (v: number | null | undefined) => (v == null ? '—' : `${Math.round(v * 100)}%`)
+/** Human duration for a number of 15-min steps: "45 min", "2 h 15 min". */
+export const span = (steps: number) => {
+  const m = Math.max(1, steps) * 15, h = Math.floor(m / 60), r = m % 60
+  return h ? (r ? `${h} h ${r} min` : `${h} h`) : `${m} min`
+}
 export const hours = (steps: number) => {
   const h = steps * 0.25
   return h < 1 ? `${Math.round(h * 60)} min` : `${h.toFixed(h < 10 ? 1 : 0)} h`

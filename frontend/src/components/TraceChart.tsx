@@ -1,9 +1,9 @@
 import { scaleLinear } from 'd3-scale'
+import { useLayoutEffect, useRef, useState } from 'react'
 import { isFault } from '../engine/engine'
 import { TONE, clock, dayOf, statusOf } from '../lib/present'
 import { useConsole } from '../state/console'
 
-const VW = 960, L = 96, R = 944, WD = R - L
 
 
 type Series = (number | null)[]
@@ -18,20 +18,42 @@ function path(ks: number[], vals: Series, x: (k: number) => number, y: (v: numbe
   return d
 }
 
+/** Track the rendered width so the chart lays out for the space it has instead of scaling down. */
+function useWidth<T extends HTMLElement>() {
+  const ref = useRef<T>(null)
+  const [w, setW] = useState(960)
+  useLayoutEffect(() => {
+    const el = ref.current; if (!el) return
+    setW(Math.round(el.clientWidth)) // before first paint, so phones never see the desktop layout
+    const ro = new ResizeObserver(([e]) => setW(Math.round(e.contentRect.width)))
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [])
+  return [ref, w] as const
+}
+
 export function TraceChart() {
   const { engine: E, k: K, sel: i } = useConsole()
+  const [box, width] = useWidth<HTMLDivElement>()
+  const narrow = width < 560
+  // On phones, ribbon labels move above their bars so the plot keeps the full width.
+  const VW = Math.max(300, width), L = narrow ? 34 : 96, R = VW - 8, WD = R - L
+  const RIB = narrow ? 22 : 16, TOP = narrow ? 70 : 58
   const k1 = Math.max(K, 95), k0 = k1 - 95
   const x = (k: number) => L + ((k - k0) / 95) * WD
   const ks: number[] = []
   for (let k = k0; k <= Math.min(K, k1); k++) ks.push(k)
   const raw = (key: 'T' | 'RH' | 'R' | 'V') => ks.map((k) => E.RAW[k][i]?.[key] ?? null)
 
+  const off = TOP - 58
   const lanes = [
-    { key: 'T' as const, label: 'Air temperature', unit: '°C', y: 74, h: 104 },
-    { key: 'RH' as const, label: 'Relative humidity', unit: '%', y: 212, h: 84 },
-    { key: 'R' as const, label: 'Rain', unit: 'mm / 15 min', y: 330, h: 64 },
-    { key: 'V' as const, label: 'Battery', unit: 'V', y: 428, h: 50 },
+    { key: 'T' as const, label: 'Air temperature', unit: '°C', y: 74 + off, h: 104 },
+    { key: 'RH' as const, label: 'Relative humidity', unit: '%', y: 212 + off, h: 84 },
+    { key: 'R' as const, label: 'Rain', unit: 'mm / 15 min', y: 330 + off, h: 64 },
+    { key: 'V' as const, label: 'Battery', unit: 'V', y: 428 + off, h: 50 },
   ]
+  const H = 512 + off, AXIS = 484 + off
+  const tickEvery = narrow ? 32 : 16
   const ribbons: [string, (k: number) => string | null][] = [
     ['Ground truth', (k) => (E.TRUTH[k][i].length ? 'var(--ink-2)' : null)],
     ['Legacy QC', (k) => (E.LEG[k][i].flag ? (E.TRUTH[k][i].length ? 'var(--muted)' : 'var(--fault)') : null)],
@@ -40,22 +62,24 @@ export function TraceChart() {
   const cw = WD / 96
 
   return (
-    <div className="scroll-soft overflow-x-auto">
-      <svg viewBox={`0 0 ${VW} 512`} className="block h-auto w-full min-w-[660px]" role="img" aria-label="24-hour sensor trace with flags">
+    <div ref={box} className="w-full">
+      <svg viewBox={`0 0 ${VW} ${H}`} width={VW} height={H} className="block h-auto w-full" role="img" aria-label="24-hour sensor trace with flags">
         {ribbons.map(([name, fn], ri) => {
-          const y = 4 + ri * 16
+          const y = (narrow ? 12 : 4) + ri * RIB
           return (
             <g key={name}>
-              <text x={L - 10} y={y + 9} textAnchor="end" fontSize="10.5" style={{ fill: 'var(--muted)' }}>{name}</text>
+              {narrow
+                ? <text x={L} y={y - 3} fontSize="10" style={{ fill: 'var(--muted)' }}>{name}</text>
+                : <text x={L - 10} y={y + 9} textAnchor="end" fontSize="10.5" style={{ fill: 'var(--muted)' }}>{name}</text>}
               <rect x={L} y={y} width={WD} height={10} rx="5" style={{ fill: 'var(--sunken)' }} />
               {ks.map((k) => { const c = fn(k); return c ? <rect key={k} x={x(k) - cw / 2} y={y} width={cw + 0.4} height={10} style={{ fill: c }} /> : null })}
             </g>
           )
         })}
-        {Array.from({ length: 96 }, (_, j) => k0 + j).filter((k) => k % 16 === 0).map((k) => (
+        {Array.from({ length: 96 }, (_, j) => k0 + j).filter((k) => k % tickEvery === 0).map((k) => (
           <g key={k}>
-            <line x1={x(k)} x2={x(k)} y1={58} y2={484} style={{ stroke: 'var(--line)' }} />
-            <text x={x(k)} y={502} textAnchor="middle" fontSize="10.5" fontFamily="Geist Mono, monospace" style={{ fill: 'var(--muted)' }}>{k % 96 === 0 ? `Day ${dayOf(k)}` : clock(k)}</text>
+            <line x1={x(k)} x2={x(k)} y1={TOP} y2={AXIS} style={{ stroke: 'var(--line)' }} />
+            <text x={x(k)} y={AXIS + 18} textAnchor="middle" fontSize="10.5" fontFamily="Geist Mono, monospace" style={{ fill: 'var(--muted)' }}>{k % 96 === 0 ? `Day ${dayOf(k)}` : clock(k)}</text>
           </g>
         ))}
         {lanes.map((ln) => {
@@ -80,7 +104,7 @@ export function TraceChart() {
               {ticks.map((v) => (
                 <g key={v}>
                   <line x1={L} x2={R} y1={y(v)} y2={y(v)} style={{ stroke: 'var(--line)' }} strokeDasharray={Math.abs(v - lo) < 1e-9 ? '' : '2 4'} />
-                  <text x={L - 10} y={y(v) + 3.5} textAnchor="end" fontSize="10.5" fontFamily="Geist Mono, monospace" style={{ fill: 'var(--muted)' }}>{v}</text>
+                  <text x={L - 6} y={y(v) + 3.5} textAnchor="end" fontSize={narrow ? 9.5 : 10.5} fontFamily="Geist Mono, monospace" style={{ fill: 'var(--muted)' }}>{v}</text>
                 </g>
               ))}
               {(ln.key === 'T' || ln.key === 'RH') && (() => {
@@ -109,7 +133,7 @@ export function TraceChart() {
                 <>
                   {ks.map((k) => { const o = E.RAW[k][i]; return o && o.R > 0.02 ? <rect key={k} x={x(k) - cw * 0.35} y={y(o.R)} width={cw * 0.7} height={y(lo) - y(o.R)} rx="1.5" style={{ fill: 'var(--accent)' }} opacity=".75" /> : null })}
                   <path d={path(ks, ks.map((k) => E.OUT[k][i].ctx.radarR), x, y)} fill="none" style={{ stroke: 'var(--storm)' }} strokeWidth="1.8" />
-                  <text x={R} y={ln.y - 8} textAnchor="end" fontSize="10.5" style={{ fill: 'var(--muted)' }}>bars: gauge · line: radar estimate</text>
+                  {!narrow && <text x={R} y={ln.y - 8} textAnchor="end" fontSize="10.5" style={{ fill: 'var(--muted)' }}>bars: gauge · line: radar estimate</text>}
                 </>
               )}
               {ln.key === 'V' && (
@@ -122,7 +146,7 @@ export function TraceChart() {
             </g>
           )
         })}
-        <line x1={x(K)} x2={x(K)} y1={2} y2={484} style={{ stroke: 'var(--accent)' }} strokeWidth="1.4" strokeDasharray="2 3" />
+        <line x1={x(K)} x2={x(K)} y1={2} y2={AXIS} style={{ stroke: 'var(--accent)' }} strokeWidth="1.4" strokeDasharray="2 3" />
       </svg>
     </div>
   )

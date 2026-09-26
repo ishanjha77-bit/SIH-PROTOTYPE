@@ -23,7 +23,7 @@ export function LeafletMap() {
     if (!host.current || map.current) return
     const m = L.map(host.current, { zoomControl: true, attributionControl: true, scrollWheelZoom: false }).fitBounds(BOUNDS)
     map.current = m
-    cv.current.width = 180; cv.current.height = 260
+    cv.current.width = 288; cv.current.height = 416
     radar.current = L.imageOverlay(cv.current.toDataURL(), BOUNDS, { opacity: 0.85, interactive: false }).addTo(m)
     markers.current = STATIONS.map((s, i) =>
       L.circleMarker([s.lat, s.lon], { radius: 8, weight: 3, fillOpacity: 1 })

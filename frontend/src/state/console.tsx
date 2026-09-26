@@ -25,6 +25,9 @@ interface ConsoleState {
   backend: Backend
   tour: number | null
   setTour: (n: number | null) => void
+  /** Insight ids the operator has acted on (dispatched / confirmed), with the step it happened. */
+  handled: Record<string, number>
+  handle: (id: string) => void
 }
 
 export interface Backend {
@@ -44,7 +47,8 @@ export interface Backend {
 }
 
 const Ctx = createContext<ConsoleState | null>(null)
-const START_K = 150
+// Day 2 14:45: squall over three stations and legacy QC has already rejected 11 real storm readings.
+const START_K = 155
 
 export function ConsoleProvider({ children }: { children: ReactNode }) {
   const [faults, setFaults] = useState<Fault[]>(DEFAULT_FAULTS)
@@ -120,6 +124,7 @@ export function ConsoleProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const [tour, setTour] = useState<number | null>(null)
+  const [handled, setHandled] = useState<Record<string, number>>({})
   const kRef = useRef(k)
   kRef.current = k
 
@@ -159,7 +164,7 @@ export function ConsoleProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const reset = useCallback(() => {
-    setPlaying(false); setFaults(DEFAULT_FAULTS); setK(START_K); setSel(stationIndex('lonavala'))
+    setPlaying(false); setFaults(DEFAULT_FAULTS); setK(START_K); setSel(stationIndex('lonavala')); setHandled({})
   }, [])
 
   const toggleTheme = useCallback(() => {
@@ -171,7 +176,9 @@ export function ConsoleProvider({ children }: { children: ReactNode }) {
     })
   }, [])
 
-  const value: ConsoleState = { engine, k, setK, playing, toggle, speed, setSpeed, sel, select, view, setView, inject, reset, theme, toggleTheme, backend, tour, setTour }
+  const handle = useCallback((id: string) => setHandled((h) => (id in h ? h : { ...h, [id]: kRef.current })), [])
+
+  const value: ConsoleState = { engine, k, setK, playing, toggle, speed, setSpeed, sel, select, view, setView, inject, reset, theme, toggleTheme, backend, tour, setTour, handled, handle }
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>
 }
 

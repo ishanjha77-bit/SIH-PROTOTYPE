@@ -1,9 +1,10 @@
-import { Activity, BatteryLow, CloudRain, Database, Download, Droplets, FileText, Radar, Satellite, Server, Sun, ThermometerSnowflake, Wind, Workflow, Zap } from 'lucide-react'
+import { Activity, BatteryLow, FlaskConical, Wrench, CloudRain, Database, Download, Droplets, FileText, Radar, Satellite, Server, Sun, ThermometerSnowflake, Wind, Workflow, Zap } from 'lucide-react'
 import { useState } from 'react'
 import { FAULT_LABEL, STATIONS, latencies, metrics } from '../engine/engine'
 import type { FaultType } from '../engine/types'
 import { openOrders, WorkOrderCard } from '../components/Blocks'
-import { Card, CardHead, Chip, CompareBars, Empty, cx } from '../components/ui'
+import { AIBadge, Button, Card, CardHead, Chip, CompareBars, EmptyState, Select, Skeleton, SkeletonRows, cx } from '../components/ui'
+import { toast } from '../components/Toast'
 import { hours, pct, stamp } from '../lib/present'
 import { shiftReport } from '../lib/report'
 import { api } from '../api/client'
@@ -26,14 +27,14 @@ export function Evaluation() {
         {tiles.map((t) => {
           const wgBetter = t.better === 'high' ? t.wg >= t.lg : t.wg <= t.lg
           return (
-            <Card key={t.label}>
+            <Card key={t.label} className="rise">
               <div className="flex items-start justify-between gap-3">
-                <div><h2 className="text-[15px] font-semibold">{t.label}</h2><p className="text-[12.5px] text-muted">{t.sub}</p></div>
+                <div><h2 className="t-h3">{t.label}</h2><p className="t-caption mt-0.5 text-muted">{t.sub}</p></div>
                 {wgBetter && <Chip tone="ok" dot={false}>WeatherGuard ahead</Chip>}
               </div>
-              <div className="mt-4 flex items-baseline gap-3">
-                <span className="tnum text-[40px] font-semibold leading-none tracking-tight text-accent">{t.fmt(t.wg)}</span>
-                <span className="text-[14px] text-muted">vs {t.fmt(t.lg)} legacy</span>
+              <div className="mt-5 flex items-baseline gap-3">
+                <span className="t-num text-[44px] leading-none text-ink">{t.fmt(t.wg)}</span>
+                <span className="t-small text-muted">vs <span className="tnum font-medium text-ink-2">{t.fmt(t.lg)}</span> legacy</span>
               </div>
               <div className="mt-5"><CompareBars wg={t.wg} legacy={t.lg} max={t.max} fmt={t.fmt} better={t.better} /></div>
             </Card>
@@ -78,16 +79,21 @@ function Benchmarks() {
   const { backend: b } = useConsole()
   const bm = b.model?.benchmarks, g = b.model?.gnn
   if (b.status !== 'online' || !bm) {
+    const loading = b.status === 'checking' || b.waking || (b.status === 'online' && !b.model)
     return (
       <Card>
-        <CardHead title="Benchmarks against literature methods" hint="Isolation Forest, LOF and One-Class SVM from the research slide, trained on the same data" />
-        <p className="text-[13px] text-muted">Start the backend to load the benchmark table (it is computed during <span className="font-mono">python -m app.ml.train</span>).</p>
+        <CardHead title="Benchmarks against literature methods" hint="Isolation Forest, LOF and One-Class SVM, trained on the same data" />
+        {loading ? <SkeletonRows rows={5} /> : (
+          <EmptyState icon={<Server size={18} />} title="Needs the backend">
+            The benchmark table is computed during <span className="font-mono">python -m app.ml.train</span> and served by the API. Start the backend to load it.
+          </EmptyState>
+        )}
       </Card>
     )
   }
   const best = (k: 'recall' | 'precision') => Math.max(...bm.rows.map((r) => r[k]))
   return (
-    <div className="grid gap-5 xl:grid-cols-[1.4fr_1fr]">
+    <div className="grid grid-cols-1 gap-5 2xl:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] [&>*]:min-w-0">
       <Card>
         <CardHead title="Benchmarks against literature methods" hint={`${bm.observations.toLocaleString('en-IN')} observations · ${bm.faulty} faulty · ${bm.storm} genuine storm readings. Every model calibrated to the same 0.1% false-alarm budget.`} />
         <div className="scroll-soft overflow-x-auto">
@@ -123,10 +129,10 @@ function Benchmarks() {
               <div key={v}>
                 <div className="mb-1.5 flex justify-between text-[13px]"><span>{{ T: 'Temperature °C', RH: 'Humidity %', P: 'Pressure hPa', W: 'Wind m/s' }[v]}</span>
                   <span className="text-[12px] text-accent">{Math.round((1 - g.rmse[v].st_gnn / g.rmse[v].idw) * 100)}% lower error</span></div>
-                <CompareBars wg={g.rmse[v].st_gnn} legacy={g.rmse[v].idw} max={g.rmse[v].idw} fmt={(x) => x.toFixed(2)} better="low" />
+                <CompareBars wg={g.rmse[v].st_gnn} legacy={g.rmse[v].idw} max={g.rmse[v].idw} fmt={(x) => x.toFixed(2)} better="low" labels={['ST-GNN', 'Inverse-dist.']} />
               </div>
             ))}
-            <p className="text-[12px] text-muted">Grey bar = inverse-distance average. Physics-informed loss keeps {((1 - g.physics_violations) * 100).toFixed(1)}% of predictions below saturation (Clausius–Clapeyron).</p>
+            <p className="text-[12px] text-muted"> Physics-informed loss keeps {((1 - g.physics_violations) * 100).toFixed(1)}% of predictions below saturation (Clausius–Clapeyron).</p>
           </div>
         </Card>
       )}
@@ -139,11 +145,11 @@ function ShiftReportCard() {
   const { engine: E, k, backend: b } = useConsole()
   const r = shiftReport(E, k)
   return (
-    <div className="grid gap-5 xl:grid-cols-[1.5fr_1fr]">
+    <div className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)] [&>*]:min-w-0">
       <Card>
-        <CardHead title={`Shift report · ${stamp(k)} IST`} hint="Written automatically for the forecaster on duty" right={<FileText size={18} className="text-muted" />} />
-        <div className="flex flex-col gap-4 text-[13.5px] leading-relaxed">
-          <p className="text-[15px] text-ink">{r.headline}</p>
+        <CardHead eyebrow={<AIBadge>Written by WeatherGuard</AIBadge>} title={`Shift report · ${stamp(k)} IST`} hint="For the forecaster on duty. Updates as the stream plays." right={<FileText size={18} className="text-muted" />} />
+        <div className="typing flex flex-col gap-5 text-[13.5px] leading-relaxed">
+          <p className="t-body text-[15px] text-ink">{r.headline}</p>
           <div><div className="eyebrow mb-1.5">Last 24 hours</div><ul className="list-disc space-y-1 pl-5 text-ink-2">{r.last24.map((x) => <li key={x}>{x}</li>)}</ul></div>
           {r.attention.length > 0 && <div><div className="eyebrow mb-1.5">Needs field attention</div><ul className="list-disc space-y-1 pl-5 text-ink-2">{r.attention.map(([n, l]) => <li key={n}><span className="text-ink">{n}</span>: {l}</li>)}</ul></div>}
           {r.predicted.length > 0 && <div><div className="eyebrow mb-1.5">Predicted failures</div><ul className="list-disc space-y-1 pl-5 text-ink-2">{r.predicted.map(([n, l]) => <li key={n}><span className="text-ink">{n}</span>: {l}</li>)}</ul></div>}
@@ -154,14 +160,17 @@ function ShiftReportCard() {
         {b.status === 'online' ? (
           <div className="flex flex-col gap-2">
             {([['csv', 'CSV', 'spreadsheets, quick checks'], ['netcdf', 'NetCDF (CF-1.8)', 'NWP pre-processing, climate archives'], ['json', 'JSON', 'APIs and dashboards']] as const).map(([f, l, d]) => (
-              <a key={f} href={api.exportUrl(f, k)} className="flex items-center justify-between gap-3 rounded-2xl border border-line px-4 py-3 transition hover:border-accent">
+              <a key={f} href={api.exportUrl(f, k)} onClick={() => toast(`Exporting ${l}`, { body: `Observations up to ${stamp(k)} with WMO QC flags`, kind: 'info' })}
+                className="group flex items-center justify-between gap-3 rounded-xl border border-line px-4 py-3 transition-colors duration-150 hover:border-accent/60 hover:bg-surface-2">
                 <span><span className="block text-[13.5px] font-medium text-ink">{l}</span><span className="block text-[12px] text-muted">{d}</span></span>
-                <Download size={16} className="text-accent" />
+                <Download size={16} className="text-muted transition-colors group-hover:text-accent" />
               </a>
             ))}
             <p className="mt-1 text-[11.5px] text-muted">Flags: 0 good · 2 doubtful · 3 erroneous · 4 corrected · 9 missing.</p>
           </div>
-        ) : <p className="text-[13px] text-muted">Start the backend to export CSV, NetCDF or JSON.</p>}
+        ) : b.status === 'checking' || b.waking ? <SkeletonRows rows={3} /> : (
+          <EmptyState icon={<Download size={18} />} title="Exports need the backend">Start the FastAPI server to download CSV, NetCDF or JSON.</EmptyState>
+        )}
       </Card>
     </div>
   )
@@ -173,9 +182,15 @@ export function Maintenance() {
   return (
     <div className="fade-in flex flex-col gap-5">
       <ShiftReportCard />
+      {orders.length > 0 && (
+        <div className="-mb-1 mt-2 flex items-baseline justify-between gap-3">
+          <h2 className="t-h2">Open work orders <span className="tnum font-normal text-muted">· {orders.length}</span></h2>
+          <span className="t-caption text-muted">Sorted by priority</span>
+        </div>
+      )}
       {orders.length ? (
         <div className="grid gap-5 md:grid-cols-2 2xl:grid-cols-3">{orders.map((l) => <WorkOrderCard key={l.fi} l={l} />)}</div>
-      ) : <Empty>No work orders yet. Faults appear here as soon as WeatherGuard confirms them.</Empty>}
+      ) : <EmptyState icon={<Wrench size={18} />} title="No work orders yet">Faults appear here as soon as WeatherGuard confirms them. Press play, or break a station in the Fault lab.</EmptyState>}
     </div>
   )
 }
@@ -201,35 +216,39 @@ export function FaultLab() {
       <Card>
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <h2 className="text-[15px] font-semibold">Break a station</h2>
-            <p className="mt-0.5 max-w-[60ch] text-[13px] text-muted">Pick a station and a failure. It starts at the next 15-minute reading. Then press play and watch WeatherGuard find it.</p>
+            <h2 className="t-h2">Break a station</h2>
+            <p className="t-small mt-1 max-w-[60ch] text-muted">Pick a station and a failure. It starts at the next 15-minute reading. Then press play and watch WeatherGuard find it.</p>
           </div>
           <label className="flex items-center gap-2 text-[13px] text-ink-2">Station
-            <select value={st} onChange={(e) => setSt(e.target.value)} className="rounded-full border border-line bg-surface px-3 py-1.5 text-[13px] text-ink">
+            <Select value={st} onChange={(e) => setSt(e.target.value)} className="min-w-[180px]">
               {STATIONS.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
-            </select>
+            </Select>
           </label>
         </div>
         <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
           {LAB.map((f) => (
-            <div key={f.type} className="flex flex-col gap-3 rounded-2xl border border-line bg-surface-2 p-4">
+            <div key={f.type} className="flex flex-col gap-3 rounded-xl border border-line bg-surface-2 p-4 transition-colors duration-150 hover:border-line-strong">
               <div className="flex items-center gap-3">
-                <span className="grid h-9 w-9 place-items-center rounded-xl bg-fault-soft text-fault"><f.icon size={17} /></span>
-                <span className="text-[14px] font-medium">{FAULT_LABEL[f.type]}</span>
+                <span className="grid h-9 w-9 place-items-center rounded-lg bg-fault-soft text-fault"><f.icon size={17} /></span>
+                <span className="t-h3">{FAULT_LABEL[f.type]}</span>
               </div>
-              <p className="text-[13px] text-ink-2">{f.looks}</p>
-              <p className="text-[12px] text-muted">Caught by: {f.caught}</p>
-              <button type="button" onClick={() => { inject(st, f.type); setDone(`${FAULT_LABEL[f.type]} injected at ${STATIONS.find((s) => s.id === st)?.name}.`) }}
-                className="mt-auto rounded-full border border-line bg-surface px-4 py-2 text-[13px] font-medium text-ink transition hover:border-accent hover:text-accent">
+              <p className="t-small text-ink-2">{f.looks}</p>
+              <p className="t-caption text-muted">Caught by: {f.caught}</p>
+              <Button className="mt-auto w-full" onClick={() => {
+                const name = STATIONS.find((s) => s.id === st)?.name
+                inject(st, f.type)
+                setDone(`${FAULT_LABEL[f.type]} injected at ${name}.`)
+                toast(`${FAULT_LABEL[f.type]} injected`, { body: `${name} · starts at the next 15-minute reading`, action: playing ? undefined : { label: 'Play stream', run: toggle } })
+              }}>
                 Inject at {STATIONS.find((s) => s.id === st)?.name.split(' ')[0]}
-              </button>
+              </Button>
             </div>
           ))}
         </div>
         {done && (
-          <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-accent-soft px-4 py-3 text-[13px]" role="status">
-            <span className="text-ink">{done}</span>
-            {!playing && <button type="button" onClick={toggle} className="rounded-full bg-accent px-4 py-1.5 text-[13px] font-medium text-accent-ink">Play stream</button>}
+          <div className="rise mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-accent/25 bg-accent-soft px-4 py-3 text-[13px]" role="status">
+            <span className="text-ink">{done} Press play and watch the pipeline find it.</span>
+            {!playing && <Button size="sm" variant="primary" onClick={toggle}>Play stream</Button>}
           </div>
         )}
       </Card>
@@ -252,7 +271,7 @@ export function FaultLab() {
               )
             })}
           </ul>
-        ) : <Empty>Nothing injected yet.</Empty>}
+        ) : <EmptyState icon={<FlaskConical size={18} />} title="Nothing injected yet">Pick a failure above. Its status will update here as the stream plays.</EmptyState>}
       </Card>
     </div>
   )
@@ -270,11 +289,19 @@ const TIERS = [
 function ModelCardView() {
   const { backend: b } = useConsole()
   const m = b.model
+  if (b.status === 'checking' || (b.status === 'online' && !m)) {
+    return (
+      <Card>
+        <CardHead title="ST-GNN + LSTM-autoencoder" hint="Loading the live model card…" />
+        <div className="grid gap-3 sm:grid-cols-[220px_1fr]">{Array.from({ length: 8 }, (_, j) => <Skeleton key={j} className="h-4" />)}</div>
+      </Card>
+    )
+  }
   if (b.status !== 'online' || !m?.trained) {
     return (
       <Card>
         <CardHead title="ST-GNN + LSTM-autoencoder" hint="Model card appears when the FastAPI backend is running" />
-        <pre className="scroll-soft overflow-x-auto rounded-2xl bg-sunken p-4 font-mono text-[12px] text-ink-2">{`cd weatherguard-backend
+        <pre className="scroll-soft overflow-x-auto rounded-xl bg-sunken p-4 font-mono text-[12px] text-ink-2">{`cd weatherguard-backend
 pip install -r requirements.txt
 python -m app.ml.train_gnn      # ST-GNN, ~2 min on a laptop CPU
 python -m app.ml.train          # LSTM-AE + benchmarks, ~2 min
@@ -314,17 +341,17 @@ export function Architecture() {
       <ModelCardView />
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
         {TIERS.map((t) => (
-          <Card key={t.n} className="flex flex-col gap-3">
-            <span className="grid h-10 w-10 place-items-center rounded-2xl bg-accent-soft text-accent"><t.icon size={19} /></span>
-            <div><div className="eyebrow">{t.n}</div><h3 className="mt-0.5 text-[16px] font-semibold tracking-tight">{t.t}</h3></div>
-            <p className="text-[13px] leading-relaxed text-ink-2">{t.d}</p>
-            <div className="mt-auto rounded-2xl bg-sunken p-3 text-[12.5px] text-ink"><span className="font-medium text-accent">In this build: </span>{t.live}</div>
+          <Card key={t.n} className="rise flex flex-col gap-3 !p-5">
+            <span className="grid h-9 w-9 place-items-center rounded-lg bg-accent-soft text-accent"><t.icon size={18} /></span>
+            <div><div className="eyebrow">{t.n}</div><h3 className="t-h3 mt-1">{t.t}</h3></div>
+            <p className="t-small text-ink-2">{t.d}</p>
+            <div className="mt-auto rounded-lg bg-sunken p-3 text-[12.5px] text-ink"><span className="font-medium text-accent">In this build: </span>{t.live}</div>
           </Card>
         ))}
       </div>
       <Card>
         <CardHead title="Backend contract" hint="The UI already consumes this shape. The FastAPI service will return the same JSON per observation." />
-        <pre className="scroll-soft overflow-x-auto rounded-2xl bg-sunken p-4 font-mono text-[12px] leading-relaxed text-ink-2">{`GET /api/v1/observations/{station_id}?at=2026-07-15T13:30+05:30
+        <pre className="scroll-soft overflow-x-auto rounded-xl bg-sunken p-4 font-mono text-[12px] leading-relaxed text-ink-2">{`GET /api/v1/observations/{station_id}?at=2026-07-15T13:30+05:30
 {
   "station": { "id": "lonavala", "name": "Lonavala", "lat": 18.75, "lon": 73.41, "elev": 622 },
   "raw":   { "T": 28.2, "RH": 89.9, "P": 935.8, "W": 17.1, "S": 191, "R": 12.1, "V": 12.62 },

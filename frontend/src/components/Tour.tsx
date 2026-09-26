@@ -2,6 +2,7 @@ import { ArrowLeft, ArrowRight, Sparkles, X } from 'lucide-react'
 import { useEffect } from 'react'
 import { stationIndex } from '../engine/engine'
 import { useConsole, type View } from '../state/console'
+import { Button, IconButton } from './ui'
 
 interface Step { view: View; k: number; st?: string; title: string; body: string }
 
@@ -42,20 +43,21 @@ export function Tour() {
 
   if (!step || tour == null) return null
   return (
-    <div role="dialog" aria-label="Guided tour" className="fade-in fixed bottom-[104px] right-3 z-40 w-[min(400px,calc(100vw-24px))] rounded-3xl border border-line bg-surface p-5 shadow-soft sm:right-6">
+    <div role="dialog" aria-label="Guided tour" key={tour}
+      className="rise fixed bottom-[calc(env(safe-area-inset-bottom,0px)+116px)] right-3 z-40 w-[min(400px,calc(100vw-24px))] rounded-2xl border border-line bg-surface p-5 shadow-lift sm:right-6 lg:bottom-[100px]">
       <div className="flex items-center justify-between gap-3">
-        <span className="inline-flex items-center gap-1.5 rounded-full bg-accent-soft px-2.5 py-1 text-[11.5px] font-medium text-accent"><Sparkles size={13} />Guided tour · {tour + 1} of {STEPS.length}</span>
-        <button type="button" onClick={() => setTour(null)} aria-label="Close tour" className="grid h-8 w-8 place-items-center rounded-full text-muted hover:bg-sunken hover:text-ink"><X size={16} /></button>
+        <span className="eyebrow !text-accent">Guided tour · {tour + 1} / {STEPS.length}</span>
+        <IconButton label="Close tour" onClick={() => setTour(null)} className="-mr-2 -mt-2"><X size={16} /></IconButton>
       </div>
-      <h3 className="mt-3 text-[17px] font-semibold tracking-tight">{step.title}</h3>
-      <p className="mt-1.5 text-[13.5px] leading-relaxed text-ink-2">{step.body}</p>
-      <div className="mt-4 flex items-center justify-between">
-        <div className="flex gap-1">{STEPS.map((_, i) => <span key={i} className={`h-1.5 rounded-full transition-all ${i === tour ? 'w-5 bg-accent' : 'w-1.5 bg-line-strong'}`} />)}</div>
+      <h3 className="t-h2 mt-2">{step.title}</h3>
+      <p className="t-small mt-2 text-ink-2">{step.body}</p>
+      <div className="mt-5 flex items-center justify-between gap-3">
+        <div className="flex gap-1" aria-hidden="true">{STEPS.map((_, i) => <span key={i} className={`h-1 rounded-full transition-all duration-300 ${i === tour ? 'w-5 bg-accent' : i < tour ? 'w-1.5 bg-accent/50' : 'w-1.5 bg-line-strong'}`} />)}</div>
         <div className="flex gap-2">
-          {tour > 0 && <button type="button" onClick={() => setTour(tour - 1)} className="inline-flex items-center gap-1 rounded-full border border-line px-3 py-1.5 text-[13px] text-ink-2 hover:text-ink"><ArrowLeft size={14} />Back</button>}
+          {tour > 0 && <Button size="sm" variant="ghost" onClick={() => setTour(tour - 1)} icon={<ArrowLeft size={14} />}>Back</Button>}
           {tour < STEPS.length - 1
-            ? <button type="button" onClick={() => setTour(tour + 1)} className="inline-flex items-center gap-1 rounded-full bg-accent px-4 py-1.5 text-[13px] font-medium text-accent-ink">Next<ArrowRight size={14} /></button>
-            : <button type="button" onClick={() => setTour(null)} className="rounded-full bg-accent px-4 py-1.5 text-[13px] font-medium text-accent-ink">Explore</button>}
+            ? <Button size="sm" variant="primary" onClick={() => setTour(tour + 1)} iconRight={<ArrowRight size={14} />}>Next</Button>
+            : <Button size="sm" variant="primary" onClick={() => setTour(null)}>Start exploring</Button>}
         </div>
       </div>
     </div>
@@ -65,8 +67,6 @@ export function Tour() {
 export function TourButton() {
   const { setTour } = useConsole()
   return (
-    <button type="button" onClick={() => setTour(0)} className="inline-flex items-center gap-2 rounded-full bg-accent px-4 py-2 text-[13px] font-medium text-accent-ink shadow-soft transition hover:brightness-105">
-      <Sparkles size={15} />2-minute tour
-    </button>
+    <Button variant="secondary" onClick={() => setTour(0)} icon={<Sparkles size={14} className="text-accent" />}>2-minute tour</Button>
   )
 }

@@ -4,18 +4,18 @@ import type { EngineResult, Latency } from '../engine/engine'
 import type { GateStatus } from '../engine/types'
 import { CLS_META, TONE, WORK_ORDER, hours, stamp, statusOf } from '../lib/present'
 import { useConsole } from '../state/console'
-import { Chip, cx, Empty } from './ui'
+import { Chip, cx, EmptyState } from './ui'
 
 export function StationList({ compact = false }: { compact?: boolean }) {
   const { engine, k, sel, select } = useConsole()
   return (
-    <ul className="divide-y divide-line">
+    <ul className="-mx-2 flex flex-col">
       {STATIONS.map((s, i) => {
         const d = engine.OUT[k][i], o = engine.RAW[k][i], st = statusOf(d), lf = engine.LEG[k][i].flag && !isFault(d.cls)
         return (
           <li key={s.id}>
             <button type="button" onClick={() => select(i, !compact)} aria-current={i === sel}
-              className={cx('grid w-full grid-cols-[1fr_auto] items-center gap-3 rounded-2xl px-3 py-2.5 text-left transition-colors sm:grid-cols-[1fr_64px_52px_auto]',
+              className={cx('grid w-full grid-cols-[1fr_auto] items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-colors duration-150 sm:grid-cols-[1fr_60px_48px_auto]',
                 i === sel ? 'bg-accent-soft' : 'hover:bg-sunken')}>
               <span className="min-w-0">
                 <span className="block truncate text-[13.5px] font-medium text-ink">{s.name}</span>
@@ -34,12 +34,12 @@ export function StationList({ compact = false }: { compact?: boolean }) {
 
 const EVENT_ICON = { storm: CloudLightning, fault: AlertTriangle, power: Zap, warn: Zap, ok: Check, off: Minus }
 
-export function EventFeed({ limit = 12 }: { limit?: number }) {
+export function EventFeed({ limit = 12, columns = false }: { limit?: number; columns?: boolean }) {
   const { engine, k, select } = useConsole()
   const ev = events(engine, k).slice(0, limit)
-  if (!ev.length) return <Empty>No anomalies yet. Press play to stream observations.</Empty>
+  if (!ev.length) return <EmptyState icon={<Check size={18} />} title="Nothing unusual yet">Every observation so far has passed all five checks. Press play to stream more data.</EmptyState>
   return (
-    <ol className="flex flex-col gap-1">
+    <ol className={cx('-mx-2 grid gap-0.5', columns && 'md:grid-cols-2 md:gap-x-6')}>
       {ev.map((e, n) => {
         const s = STATIONS[e.i], o = engine.RAW[e.k][e.i]
         const tone = e.cls === 'WARN' ? 'warn' : CLS_META[e.cls].tone
@@ -61,8 +61,8 @@ export function EventFeed({ limit = 12 }: { limit?: number }) {
         })()
         return (
           <li key={`${e.k}-${e.i}-${n}`}>
-            <button type="button" onClick={() => select(e.i, true)} className="flex w-full items-start gap-3 rounded-2xl px-2.5 py-2 text-left transition-colors hover:bg-sunken">
-              <span className={cx('mt-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-full', TONE[tone].bg, TONE[tone].fg)}><Icon size={14} /></span>
+            <button type="button" onClick={() => select(e.i, true)} className="flex w-full items-start gap-3 rounded-lg px-2 py-2 text-left transition-colors duration-150 hover:bg-sunken">
+              <span className={cx('mt-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-lg', TONE[tone].bg, TONE[tone].fg)}><Icon size={14} /></span>
               <span className="min-w-0">
                 <span className="block text-[13px] text-ink">{text}</span>
                 <span className="tnum block font-mono text-[11px] text-muted">{stamp(e.k)}</span>
@@ -81,9 +81,9 @@ const GATE_STYLE: Record<GateStatus, { tone: keyof typeof TONE; label: string }>
 }
 const GATE_SUB: Record<string, string> = { E: 'Battery & ADC', P: 'Clausius–Clapeyron · Magnus–Tetens', T: 'Step & flatline', R: 'DWR radar · INSAT', S: 'Buddy check · CUSUM' }
 
-export function GateStepper() {
+export function GateStepper({ i }: { i?: number } = {}) {
   const { engine, k, sel } = useConsole()
-  const gates = engine.OUT[k][sel].gates
+  const gates = engine.OUT[k][i ?? sel].gates
   return (
     <ol className="relative flex flex-col">
       {gates.map((gt, n) => {
@@ -91,7 +91,7 @@ export function GateStepper() {
         return (
           <li key={n} className="relative grid grid-cols-[28px_1fr] gap-3 pb-4 last:pb-0">
             {n < gates.length - 1 && <span className="absolute left-[13.5px] top-7 bottom-0 w-px bg-line" />}
-            <span className={cx('relative z-10 mt-0.5 grid h-7 w-7 place-items-center rounded-full text-[12px] font-semibold', TONE[s.tone].bg, TONE[s.tone].fg)}>
+            <span className={cx('relative z-10 mt-0.5 grid h-7 w-7 place-items-center rounded-lg text-[12px] font-semibold ring-4 ring-surface', TONE[s.tone].bg, TONE[s.tone].fg)}>
               {gt.status === 'pass' ? <Check size={14} strokeWidth={2.4} /> : gt.status === 'skip' ? <Minus size={14} /> : gt.status === 'severe' ? <CloudLightning size={14} /> : <AlertTriangle size={13} />}
             </span>
             <div className="min-w-0">
@@ -129,7 +129,7 @@ export function ReadingsTable() {
   ]
   return (
     <div className="scroll-soft overflow-x-auto">
-      <table className="w-full min-w-[480px] text-[13px]">
+      <table className="w-full min-w-[340px] text-[12.5px] sm:text-[13px]">
         <thead>
           <tr className="text-left text-[11.5px] text-muted">
             <th className="pb-2 font-normal">Sensor</th><th className="pb-2 text-right font-normal">Reported</th>
@@ -138,12 +138,12 @@ export function ReadingsTable() {
         </thead>
         <tbody className="tnum font-mono">
           {rows.map((r) => (
-            <tr key={r[0]} className="border-t border-line">
-              <td className="py-2 font-sans text-ink-2">{r[0]}</td>
-              <td className="py-2 text-right text-ink">{r[1]}</td>
-              <td className="py-2 text-right text-muted">{r[2]}</td>
-              <td className="py-2 text-right">{r[3]}</td>
-              <td className="py-2 text-right text-ink">{r[4]}</td>
+            <tr key={r[0]} className="border-t border-line transition-colors hover:bg-surface-2">
+              <td className="py-2.5 pl-1 font-sans text-ink-2">{r[0]}</td>
+              <td className="py-2.5 text-right text-ink">{r[1]}</td>
+              <td className="py-2.5 text-right text-muted">{r[2]}</td>
+              <td className="py-2.5 text-right">{r[3]}</td>
+              <td className="py-2.5 text-right text-ink">{r[4]}</td>
             </tr>
           ))}
         </tbody>
@@ -158,29 +158,33 @@ export function openOrders(E: EngineResult, K: number): Latency[] {
 }
 
 export function WorkOrderCard({ l }: { l: Latency }) {
-  const { select } = useConsole()
+  const { select, handled } = useConsole()
   const w = WORK_ORDER[l.fault.type], s = STATIONS[l.i]
+  const doneAt = handled[`fault-${l.i}`] ?? handled[`warn-${l.i}`]
   const kd = l.fault.type === 'power' && l.predictive >= 0 ? l.predictive : l.wg
   const predictive = l.fault.type === 'power' && l.predictive >= 0 && (l.onset < 0 || l.predictive < l.onset)
   const lead = predictive && l.onset >= 0 ? `${hours(l.onset - l.predictive)} before failure` : predictive ? 'before failure' : `${hours(Math.max(0, l.wg - l.onset))} after onset`
   const tone = w.priority === 'P1' ? 'fault' : w.priority === 'P2' ? 'warn' : 'off'
   return (
-    <article className="flex flex-col gap-3 rounded-3xl border border-line bg-surface p-5 shadow-soft">
+    <article className="rise flex flex-col gap-4 rounded-2xl border border-line bg-surface p-5 shadow-soft transition-[border-color,transform] duration-200 hover:-translate-y-px hover:border-line-strong">
       <div className="flex items-center justify-between gap-2">
         <span className="tnum font-mono text-[11.5px] text-muted">WO-{String(2601 + l.fi).padStart(5, '0')}</span>
-        <Chip tone={tone} dot={false}>{w.priority}{predictive ? ' · predictive' : ''}</Chip>
+        <span className="flex items-center gap-1.5">
+          {doneAt != null && <Chip tone="ok" dot={false}><Check size={12} strokeWidth={2.6} />Dispatched {stamp(doneAt).replace('Day ', 'D')}</Chip>}
+          <Chip tone={tone} dot={false}>{w.priority}{predictive ? ' · predictive' : ''}</Chip>
+        </span>
       </div>
       <div>
-        <h3 className="text-[16px] font-semibold tracking-tight">{w.title}</h3>
+        <h3 className="t-h2">{w.title}</h3>
         <button type="button" onClick={() => select(l.i, true)} className="text-[13px] text-accent hover:underline">{s.name}</button>
       </div>
-      <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5 text-[12.5px]">
+      <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 border-t border-line pt-4 text-[12.5px]">
         <dt className="text-muted">Root cause</dt><dd className="text-ink">{FAULT_LABEL[l.fault.type]}</dd>
         <dt className="text-muted">Detected</dt><dd className="text-ink">{stamp(kd)} <span className="text-muted">· {lead}</span></dd>
         <dt className="text-muted">Legacy QC</dt><dd className={l.lg >= 0 ? 'text-ink' : 'text-fault'}>{l.lg >= 0 ? `caught ${hours(l.lg - l.onset)} after onset` : 'not detected'}</dd>
         <dt className="text-muted">Carry</dt><dd className="text-ink-2">{w.parts}</dd>
       </dl>
-      {l.fault.user && <span className="text-[11.5px] text-accent">Injected from the Fault lab</span>}
+      {l.fault.user && <span className="t-caption font-medium text-accent">Injected from the Fault lab</span>}
     </article>
   )
 }
