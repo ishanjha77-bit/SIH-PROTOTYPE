@@ -1,0 +1,8 @@
+# Frontend-only deploy (runs the full pipeline in the browser; set VITE_API_URL to use a backend)
+[build]
+  command = "npm run build"
+  publish = "dist"
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

@@ -1,0 +1,34 @@
+{
+  "name": "WeatherGuard LSTM-autoencoder",
+  "version": "0.1.0",
+  "window": 16,
+  "recent": 4,
+  "n_features": 5,
+  "hidden": 32,
+  "latent": 8,
+  "threshold": 2.528020143508911,
+  "features": [
+    "z_T",
+    "z_RH",
+    "z_P",
+    "z_W",
+    "rain_minus_radar"
+  ],
+  "params": 10797,
+  "train_windows": 157248,
+  "val_windows": 19656,
+  "scenarios": 48,
+  "epochs": 12,
+  "val_loss": 0.18016529083251953,
+  "eval": {
+    "roc_auc_fault_vs_normal": 0.754,
+    "anomaly_false_positives": 0,
+    "pipeline_false_positives": 0
+  },
+  "trained_at": "2026-09-26T10:18:12",
+  "train_seconds": 99.8,
+  "spatial": "st-gnn",
+  "onnx_bytes": 48560,
+  "int8_onnx_bytes": 22526,
+  "int8_score_correlation": 0.9997
+}

@@ -1,0 +1,9 @@
+# Render Blueprint: New → Blueprint → pick this repo. Free plan sleeps after 15 min idle (~1 min wake-up).
+services:
+  - type: web
+    name: weatherguard-ai
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/v1/health
+    autoDeploy: true

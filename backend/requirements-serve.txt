@@ -1,0 +1,6 @@
+# Minimal runtime for deployment: ONNX Runtime instead of PyTorch (≈150 MB image instead of ≈1.5 GB)
+fastapi>=0.115
+uvicorn[standard]>=0.30
+numpy>=1.26
+onnxruntime>=1.18
+scipy>=1.11

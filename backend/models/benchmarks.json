@@ -1,0 +1,55 @@
+{
+  "observations": 3370,
+  "faulty": 809,
+  "storm": 321,
+  "rows": [
+    {
+      "method": "Isolation Forest",
+      "kind": "classical ML",
+      "recall": 0.0049,
+      "precision": 0.5714,
+      "false_alarms": 3,
+      "storm_rejected": 3
+    },
+    {
+      "method": "Local Outlier Factor",
+      "kind": "classical ML",
+      "recall": 0.1854,
+      "precision": 1.0,
+      "false_alarms": 0,
+      "storm_rejected": 0
+    },
+    {
+      "method": "One-Class SVM",
+      "kind": "classical ML",
+      "recall": 0.1829,
+      "precision": 0.9933,
+      "false_alarms": 1,
+      "storm_rejected": 1
+    },
+    {
+      "method": "LSTM-autoencoder alone",
+      "kind": "deep learning",
+      "recall": 0.2114,
+      "precision": 1.0,
+      "false_alarms": 0,
+      "storm_rejected": 0
+    },
+    {
+      "method": "Legacy rule-based QC",
+      "kind": "rules",
+      "recall": 0.267,
+      "precision": 0.931,
+      "false_alarms": 16,
+      "storm_rejected": 12
+    },
+    {
+      "method": "WeatherGuard (full pipeline)",
+      "kind": "physics + AI",
+      "recall": 0.8517,
+      "precision": 1.0,
+      "false_alarms": 0,
+      "storm_rejected": 0
+    }
+  ]
+}

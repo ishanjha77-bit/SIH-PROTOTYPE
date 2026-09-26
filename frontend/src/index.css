@@ -1,0 +1,119 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ---------- Theme tokens: calm "mist" palette ---------- */
+:root {
+  color-scheme: light;
+  --bg: #eef2f1;
+  --surface: #ffffff;
+  --surface-2: #f6f9f8;
+  --sunken: #e7eeec;
+  --line: #dde5e3;
+  --line-strong: #cbd6d4;
+  --ink: #1b2a2f;
+  --ink-2: #46575d;
+  --muted: #7a8b90;
+  --accent: #2e7d8c;
+  --accent-ink: #ffffff;
+  --accent-soft: #dcedef;
+
+  --ok: #33936f;      --ok-soft: #e0f2ea;
+  --storm: #6d60cf;   --storm-soft: #ebe9fb;
+  --fault: #cf5a52;   --fault-soft: #fbe6e3;
+  --power: #c77f2f;   --power-soft: #f9ecda;
+  --warn: #a98a1f;    --warn-soft: #f5efd6;
+  --off: #86959a;     --off-soft: #e9eeee;
+
+  --sea: #dfe9ec;
+  --land: #f4f7f6;
+  --shadow: 0 1px 2px rgb(16 32 38 / 0.04), 0 10px 30px -18px rgb(16 32 38 / 0.18);
+}
+
+.dark {
+  color-scheme: dark;
+  --bg: #0d1416;
+  --surface: #131c1f;
+  --surface-2: #172226;
+  --sunken: #0f181a;
+  --line: #223034;
+  --line-strong: #2d3e43;
+  --ink: #e2ebeb;
+  --ink-2: #aebdbf;
+  --muted: #7d8f92;
+  --accent: #6cc3cf;
+  --accent-ink: #062226;
+  --accent-soft: #15353a;
+
+  --ok: #5cc49b;      --ok-soft: #14302a;
+  --storm: #a79ff2;   --storm-soft: #25224a;
+  --fault: #f08a82;   --fault-soft: #3a201f;
+  --power: #eba560;   --power-soft: #3a2a17;
+  --warn: #dcbf5c;    --warn-soft: #322c14;
+  --off: #7f9094;     --off-soft: #1c272a;
+
+  --sea: #0f1c20;
+  --land: #141e21;
+  --shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 12px 32px -20px rgb(0 0 0 / 0.6);
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-sunken: var(--sunken);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-accent-soft: var(--accent-soft);
+  --color-ok: var(--ok);
+  --color-ok-soft: var(--ok-soft);
+  --color-storm: var(--storm);
+  --color-storm-soft: var(--storm-soft);
+  --color-fault: var(--fault);
+  --color-fault-soft: var(--fault-soft);
+  --color-power: var(--power);
+  --color-power-soft: var(--power-soft);
+  --color-warn: var(--warn);
+  --color-warn-soft: var(--warn-soft);
+  --color-off: var(--off);
+  --color-off-soft: var(--off-soft);
+  --font-sans: "Geist", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, "SFMono-Regular", Consolas, monospace;
+  --shadow-soft: var(--shadow);
+}
+
+html, body, #root { height: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  transition: background-color .3s ease, color .3s ease;
+}
+h1, h2, h3 { text-wrap: balance; }
+.tnum { font-variant-numeric: tabular-nums; }
+.eyebrow { font-family: var(--font-mono); font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 6px; }
+
+/* range input */
+input[type="range"].wg-range { -webkit-appearance: none; appearance: none; background: transparent; width: 100%; height: 28px; position: relative; z-index: 2; }
+input[type="range"].wg-range::-webkit-slider-runnable-track { height: 6px; background: transparent; }
+input[type="range"].wg-range::-moz-range-track { height: 6px; background: transparent; }
+input[type="range"].wg-range::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; margin-top: -5px; border-radius: 50%; background: var(--surface); border: 2px solid var(--accent); box-shadow: 0 2px 6px rgb(0 0 0 / .15); cursor: grab; }
+input[type="range"].wg-range::-moz-range-thumb { width: 14px; height: 14px; border-radius: 50%; background: var(--surface); border: 2px solid var(--accent); cursor: grab; }
+
+.fade-in { animation: fade .35s ease both; }
+@keyframes fade { from { opacity: .0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+.breathe { animation: breathe 2.4s ease-in-out infinite; }
+@keyframes breathe { 50% { opacity: .35; } }
+@media (prefers-reduced-motion: reduce) { .fade-in, .breathe { animation: none; } }
+
+.scroll-soft { scrollbar-width: thin; scrollbar-color: var(--line-strong) transparent; }
