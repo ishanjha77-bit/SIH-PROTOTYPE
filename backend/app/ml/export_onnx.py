@@ -68,7 +68,7 @@ def main() -> None:
         meta = json.loads(meta_path.read_text())
         meta.update(extra)
         meta_path.write_text(json.dumps(meta, indent=2))
-    print(f"st_gnn.onnx {path.stat().st_size / 1024:.0f} KB (max |Δ| {gnn_err:.2e}) · lstm_ae.onnx {ae_path.stat().st_size / 1024:.0f} KB · "
+    print(f"st_gnn.onnx {path.stat().st_size / 1024:.0f} KB (max abs err {gnn_err:.2e}) · lstm_ae.onnx {ae_path.stat().st_size / 1024:.0f} KB · "
           f"int8 {q_path.stat().st_size / 1024:.0f} KB (score corr {corr:.4f})")
 
 
