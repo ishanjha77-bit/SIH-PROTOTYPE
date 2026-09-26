@@ -4,80 +4,77 @@
 
 /* ==========================================================================
    WeatherGuard design tokens
-   One accent (signal cyan) for "the system is working for you",
-   one secondary (storm violet) reserved for genuine severe weather.
-   Status colours carry meaning only: ok / storm / fault / power / warn / off.
+   Paper and ink. About 90% neutral; one ink-blue accent for links, the primary
+   action and focus. Status colours are muted and only ever mean something:
+   ok · severe weather · fault · power · warning · offline.
    ========================================================================== */
 :root {
   color-scheme: light;
-  --bg: #f5f7fa;
+  --bg: #fafaf9;
   --surface: #ffffff;
-  --surface-2: #fafbfc;
-  --sunken: #eef1f5;
-  --line: #e3e7ed;
-  --line-strong: #cdd3dc;
-  --ink: #0b1220;
-  --ink-2: #445066;
-  --muted: #5f6a7d;
-  --accent: #077a72;
+  --surface-2: #f6f6f4;
+  --sunken: #f2f2f0;
+  --line: #e8e7e3;
+  --line-strong: #d3d2cd;
+  --ink: #141414;
+  --ink-2: #4b4b48;
+  --muted: #686864;
+  --accent: #2446c7;
   --accent-ink: #ffffff;
-  --accent-soft: #dff4f1;
-  --accent-glow: rgb(7 122 114 / 0.12);
+  --accent-soft: #eef1fb;
 
-  --ok: #0c774d;      --ok-soft: #e1f4ea;
-  --storm: #5a3bd6;   --storm-soft: #ece8fd;
-  --fault: #c23631;   --fault-soft: #fce8e6;
-  --power: #9a540c;   --power-soft: #fbeedd;
-  --warn: #876500;    --warn-soft: #f8f0d4;
-  --off: #5f6a7d;     --off-soft: #edf0f3;
+  --ok: #1d7648;      --ok-soft: #ecf4ef;
+  --storm: #5a44bf;   --storm-soft: #f1eefb;
+  --fault: #b0271f;   --fault-soft: #fbeeec;
+  --power: #955300;   --power-soft: #fbf2e6;
+  --warn: #846300;    --warn-soft: #f8f3e1;
+  --off: #686864;     --off-soft: #f2f2f0;
 
-  --sea: #e4ebf2;
-  --land: #f9fafb;
-  --shadow: 0 1px 2px rgb(11 18 32 / 0.04), 0 8px 24px -16px rgb(11 18 32 / 0.16);
-  --shadow-lg: 0 2px 6px rgb(11 18 32 / 0.05), 0 24px 60px -24px rgb(11 18 32 / 0.28);
-  --scrim: rgb(11 18 32 / 0.32);
+  --sea: #f0f0ee;
+  --land: #fafaf9;
+  --shadow: 0 1px 2px rgb(20 20 20 / 0.04);
+  --shadow-lg: 0 12px 40px -12px rgb(20 20 20 / 0.18), 0 1px 3px rgb(20 20 20 / 0.06);
+  --scrim: rgb(20 20 20 / 0.28);
 
-  /* Aliases in the conventional vocabulary */
   --background: var(--bg);
   --foreground: var(--ink);
   --primary: var(--accent);
-  --secondary: var(--storm);
+  --secondary: var(--ink-2);
   --card: var(--surface);
   --border: var(--line);
   --success: var(--ok);
   --warning: var(--warn);
   --danger: var(--fault);
 
-  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-out: cubic-bezier(0.2, 0.7, 0.1, 1);
 }
 
 .dark {
   color-scheme: dark;
-  --bg: #080b10;
-  --surface: #0e131a;
-  --surface-2: #121821;
-  --sunken: #0a0f15;
-  --line: #1b2430;
-  --line-strong: #293442;
-  --ink: #e9eef4;
-  --ink-2: #a3aebd;
-  --muted: #848fa0;
-  --accent: #3fd8c8;
-  --accent-ink: #03201d;
-  --accent-soft: #0f2a2a;
-  --accent-glow: rgb(63 216 200 / 0.14);
+  --bg: #0d0d0e;
+  --surface: #131315;
+  --surface-2: #171719;
+  --sunken: #101012;
+  --line: #242427;
+  --line-strong: #34343a;
+  --ink: #ededec;
+  --ink-2: #b3b3ae;
+  --muted: #8a8a85;
+  --accent: #93a9ff;
+  --accent-ink: #0d0d0e;
+  --accent-soft: #1a1e2e;
 
-  --ok: #3ecf8e;      --ok-soft: #0f2a1f;
-  --storm: #a393ff;   --storm-soft: #1d1a3a;
-  --fault: #f5706b;   --fault-soft: #331818;
-  --power: #f2a553;   --power-soft: #33240f;
-  --warn: #e6c34f;    --warn-soft: #2e2710;
-  --off: #848fa0;     --off-soft: #161d26;
+  --ok: #62c08f;      --ok-soft: #13211a;
+  --storm: #a898f0;   --storm-soft: #1d1a2c;
+  --fault: #ef8a80;   --fault-soft: #2a1716;
+  --power: #e0a65c;   --power-soft: #2a2013;
+  --warn: #d8b451;    --warn-soft: #272212;
+  --off: #8a8a85;     --off-soft: #19191b;
 
-  --sea: #0b121a;
-  --land: #0f151d;
-  --shadow: 0 1px 0 rgb(255 255 255 / 0.02) inset, 0 12px 32px -20px rgb(0 0 0 / 0.7);
-  --shadow-lg: 0 1px 0 rgb(255 255 255 / 0.03) inset, 0 32px 80px -24px rgb(0 0 0 / 0.8);
+  --sea: #111113;
+  --land: #0d0d0e;
+  --shadow: 0 1px 2px rgb(0 0 0 / 0.4);
+  --shadow-lg: 0 16px 48px -12px rgb(0 0 0 / 0.7), 0 0 0 1px rgb(255 255 255 / 0.04);
   --scrim: rgb(0 0 0 / 0.55);
 }
 
@@ -112,85 +109,86 @@
   --shadow-lift: var(--shadow-lg);
 }
 
-html, body, #root { height: 100%; }
+html, body, #root { min-height: 100%; }
 body {
   margin: 0;
   background: var(--bg);
   color: var(--ink);
   font-family: var(--font-sans);
-  font-size: 14px;
-  line-height: 1.5;
+  font-size: 15px;
+  line-height: 1.55;
   -webkit-font-smoothing: antialiased;
   font-feature-settings: "ss01", "cv11";
+  transition: background-color .25s ease, color .25s ease;
 }
 h1, h2, h3 { text-wrap: balance; }
 p { text-wrap: pretty; }
 ::selection { background: var(--accent-soft); color: var(--ink); }
 @layer base {
-  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 8px; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
 }
 
-/* ---------- Type scale (component layer, so utilities can override) ---------- */
+/* ---------- Type scale. Hierarchy comes from size, weight and space, not from boxes or colour. ---------- */
 @layer components {
-.t-display { font-size: clamp(44px, 7vw, 68px); line-height: 0.95; font-weight: 600; letter-spacing: -0.045em; font-variant-numeric: tabular-nums; }
-.t-h1 { font-size: clamp(24px, 3vw, 30px); line-height: 1.15; font-weight: 600; letter-spacing: -0.025em; }
-.t-h2 { font-size: 17px; line-height: 1.3; font-weight: 600; letter-spacing: -0.015em; }
-.t-h3 { font-size: 14.5px; line-height: 1.35; font-weight: 600; letter-spacing: -0.01em; }
-.t-body { font-size: 14px; line-height: 1.6; }
-.t-small { font-size: 13px; line-height: 1.5; }
-.t-caption { font-size: 11.5px; line-height: 1.4; }
-.t-num { font-variant-numeric: tabular-nums; letter-spacing: -0.02em; font-weight: 600; }
-.tnum { font-variant-numeric: tabular-nums; }
-.eyebrow { font-family: var(--font-mono); font-size: 10.5px; font-weight: 500; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+  .t-display { font-size: clamp(40px, 5.4vw, 68px); line-height: 1.02; font-weight: 500; letter-spacing: -0.042em; }
+  .t-headline { font-size: clamp(28px, 3.3vw, 44px); line-height: 1.08; font-weight: 500; letter-spacing: -0.032em; }
+  .t-h1 { font-size: clamp(26px, 2.6vw, 34px); line-height: 1.12; font-weight: 500; letter-spacing: -0.028em; }
+  .t-h2 { font-size: clamp(19px, 1.7vw, 22px); line-height: 1.25; font-weight: 500; letter-spacing: -0.018em; }
+  .t-h3 { font-size: 15px; line-height: 1.4; font-weight: 500; letter-spacing: -0.008em; }
+  .t-lead { font-size: clamp(16px, 1.25vw, 18px); line-height: 1.55; letter-spacing: -0.006em; }
+  .t-body { font-size: 15px; line-height: 1.6; }
+  .t-small { font-size: 13.5px; line-height: 1.5; }
+  .t-caption { font-size: 12.5px; line-height: 1.45; }
+  .t-figure { font-variant-numeric: tabular-nums; font-weight: 400; letter-spacing: -0.035em; line-height: 1; }
+  .t-num { font-variant-numeric: tabular-nums; letter-spacing: -0.015em; font-weight: 500; }
+  .tnum { font-variant-numeric: tabular-nums; }
+  /* A quiet label: sentence case, not shouting mono caps. */
+  .eyebrow { font-size: 12.5px; font-weight: 500; letter-spacing: 0; color: var(--muted); }
+  .link { color: var(--accent); text-underline-offset: 3px; text-decoration-thickness: 1px; }
+  .link:hover { text-decoration: underline; }
+  .rule { border-top: 1px solid var(--line); }
 }
-
-/* ---------- Surfaces ---------- */
-.hero-glow { background:
-  radial-gradient(60% 80% at 0% 0%, var(--accent-glow), transparent 70%),
-  radial-gradient(40% 60% at 100% 0%, color-mix(in srgb, var(--storm) 10%, transparent), transparent 70%); }
-.ai-edge { position: relative; }
-.ai-edge::before { content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1px; pointer-events: none;
-  background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 55%, transparent), transparent 40%, transparent 70%, color-mix(in srgb, var(--storm) 35%, transparent));
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; }
 
 /* ---------- Range input ---------- */
-input[type="range"].wg-range { -webkit-appearance: none; appearance: none; background: transparent; width: 100%; height: 28px; position: relative; z-index: 2; }
-input[type="range"].wg-range::-webkit-slider-runnable-track { height: 6px; background: transparent; }
-input[type="range"].wg-range::-moz-range-track { height: 6px; background: transparent; }
-input[type="range"].wg-range::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; margin-top: -5px; border-radius: 50%; background: var(--surface); border: 2px solid var(--accent); box-shadow: 0 0 0 4px var(--accent-glow); cursor: grab; transition: transform .15s var(--ease-out); }
-input[type="range"].wg-range:active::-webkit-slider-thumb { transform: scale(1.15); cursor: grabbing; }
-input[type="range"].wg-range::-moz-range-thumb { width: 14px; height: 14px; border-radius: 50%; background: var(--surface); border: 2px solid var(--accent); cursor: grab; }
+input[type="range"].wg-range { -webkit-appearance: none; appearance: none; background: transparent; width: 100%; height: 24px; position: relative; z-index: 2; }
+input[type="range"].wg-range::-webkit-slider-runnable-track { height: 2px; background: transparent; }
+input[type="range"].wg-range::-moz-range-track { height: 2px; background: transparent; }
+input[type="range"].wg-range::-webkit-slider-thumb { -webkit-appearance: none; width: 13px; height: 13px; margin-top: -5.5px; border-radius: 50%; background: var(--ink); border: 2px solid var(--bg); cursor: grab; transition: transform .15s var(--ease-out); }
+input[type="range"].wg-range:hover::-webkit-slider-thumb { transform: scale(1.15); }
+input[type="range"].wg-range::-moz-range-thumb { width: 11px; height: 11px; border-radius: 50%; background: var(--ink); border: 2px solid var(--bg); cursor: grab; }
 
-/* ---------- Motion ---------- */
-.fade-in { animation: rise .28s var(--ease-out) both; }
-.rise { animation: rise .32s var(--ease-out) both; }
-@keyframes rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+/* ---------- Motion: short, quiet, meaningful ---------- */
+.fade-in { animation: fade-up .3s var(--ease-out) both; }
+.rise { animation: fade-up .3s var(--ease-out) both; }
+@keyframes fade-up { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
 .breathe { animation: breathe 2.4s ease-in-out infinite; }
 @keyframes breathe { 50% { opacity: .35; } }
-.pulse-ring { position: relative; }
-.pulse-ring::after { content: ""; position: absolute; inset: -3px; border-radius: 999px; border: 1.5px solid currentColor; opacity: 0; animation: ring 2s var(--ease-out) infinite; }
-@keyframes ring { 0% { opacity: .6; transform: scale(.7); } 100% { opacity: 0; transform: scale(1.6); } }
 
-.skeleton { position: relative; overflow: hidden; background: var(--sunken); border-radius: 8px; }
+.skeleton { position: relative; overflow: hidden; background: var(--sunken); border-radius: 3px; }
 .skeleton::after { content: ""; position: absolute; inset: 0; transform: translateX(-100%);
-  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--ink) 6%, transparent), transparent); animation: shimmer 1.4s infinite; }
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--ink) 5%, transparent), transparent); animation: shimmer 1.4s infinite; }
 @keyframes shimmer { to { transform: translateX(100%); } }
 
 .progress-indeterminate { position: relative; overflow: hidden; }
-.progress-indeterminate::after { content: ""; position: absolute; inset: 0; width: 35%; background: var(--accent); border-radius: 999px; animation: indet 1.1s var(--ease-out) infinite; }
+.progress-indeterminate::after { content: ""; position: absolute; inset: 0; width: 35%; background: var(--accent); animation: indet 1.1s var(--ease-out) infinite; }
 @keyframes indet { from { transform: translateX(-100%); } to { transform: translateX(300%); } }
 
-.drawer-in { animation: drawer .26s var(--ease-out) both; }
-@keyframes drawer { from { transform: translateX(24px); opacity: 0; } to { transform: none; opacity: 1; } }
-.sheet-in { animation: sheet .26s var(--ease-out) both; }
-@keyframes sheet { from { transform: translateY(24px); opacity: 0; } to { transform: none; opacity: 1; } }
+.drawer-in { animation: drawer .28s var(--ease-out) both; }
+@keyframes drawer { from { transform: translateX(16px); opacity: 0; } to { transform: none; opacity: 1; } }
+.sheet-in { animation: sheet .28s var(--ease-out) both; }
+@keyframes sheet { from { transform: translateY(-8px); opacity: 0; } to { transform: none; opacity: 1; } }
 .scrim-in { animation: scrim .2s ease both; }
 @keyframes scrim { from { opacity: 0; } to { opacity: 1; } }
-.typing > * { animation: rise .35s var(--ease-out) both; }
-.typing > *:nth-child(2) { animation-delay: .08s; }
-.typing > *:nth-child(3) { animation-delay: .16s; }
-.typing > *:nth-child(4) { animation-delay: .24s; }
-.typing > *:nth-child(5) { animation-delay: .32s; }
+.typing > * { animation: fade-up .35s var(--ease-out) both; }
+.typing > *:nth-child(2) { animation-delay: .06s; }
+.typing > *:nth-child(3) { animation-delay: .12s; }
+.typing > *:nth-child(4) { animation-delay: .18s; }
+.typing > *:nth-child(5) { animation-delay: .24s; }
+
+/* Underline that grows from the left: nav active state and text links. */
+.nav-link { position: relative; }
+.nav-link::after { content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 1px; background: var(--ink); transform: scaleX(0); transform-origin: left; transition: transform .25s var(--ease-out); }
+.nav-link[aria-current="page"]::after { transform: scaleX(1); }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; }
@@ -202,4 +200,31 @@ input[type="range"].wg-range::-moz-range-thumb { width: 14px; height: 14px; bord
 
 /* Leaflet: match the theme */
 .leaflet-container { background: var(--sea); font-family: var(--font-sans); }
-.leaflet-tooltip { background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-radius: 8px; box-shadow: var(--shadow); }
+.leaflet-tooltip { background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-radius: 4px; box-shadow: var(--shadow); }
+
+/* ==========================================================================
+   Opening sequence
+   ========================================================================== */
+/* Before React mounts, index.html adds .intro-hold so the first paint is already the intro's darkness. */
+html.intro-hold, html.intro-hold body { background: #0d0d0e; }
+html.intro-hold [data-reveal] { opacity: 0; }
+/* Staggered entrance of the app as the intro dissolves. --d is the delay in ms. */
+html.intro-reveal [data-reveal] { animation: app-in .6s var(--ease-out) both; animation-delay: calc(var(--d, 0) * 1ms); }
+@keyframes app-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+/* Logo, name and lines arrive together in one calm fade, then hold perfectly still. */
+.intro-brand > * { opacity: 0; filter: blur(6px);
+  transition: opacity 1s cubic-bezier(.2,.7,.1,1), filter 1s cubic-bezier(.2,.7,.1,1); }
+.intro-brand.in > * { opacity: 1; filter: blur(0); }
+.intro-brand.out > * { opacity: 0; filter: blur(4px); transition-duration: .8s; }
+.intro-skip { animation: fade-up .4s var(--ease-out) .7s both; }
+/* The mark's radar sweep turns in once as everything appears, then rests. */
+.mark-sweep { transform: rotate(-300deg); transition: transform 1.6s cubic-bezier(.3,.6,.1,1); }
+.intro-brand.in .mark-sweep { transform: none; }
+.intro-atmos { background-size: cover, 128px 128px; mix-blend-mode: normal; }
+
+@media (prefers-reduced-motion: reduce) {
+  html.intro-reveal [data-reveal] { animation: fade-only .4s ease both; animation-delay: 0s; }
+  @keyframes fade-only { from { opacity: 0; } to { opacity: 1; } }
+  .intro-brand > * { filter: none; transform: none; }
+}

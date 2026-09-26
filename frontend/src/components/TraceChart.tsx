@@ -71,7 +71,7 @@ export function TraceChart() {
               {narrow
                 ? <text x={L} y={y - 3} fontSize="10" style={{ fill: 'var(--muted)' }}>{name}</text>
                 : <text x={L - 10} y={y + 9} textAnchor="end" fontSize="10.5" style={{ fill: 'var(--muted)' }}>{name}</text>}
-              <rect x={L} y={y} width={WD} height={10} rx="5" style={{ fill: 'var(--sunken)' }} />
+              <rect x={L} y={y} width={WD} height={10} rx="1" style={{ fill: 'var(--sunken)' }} />
               {ks.map((k) => { const c = fn(k); return c ? <rect key={k} x={x(k) - cw / 2} y={y} width={cw + 0.4} height={10} style={{ fill: c }} /> : null })}
             </g>
           )
@@ -100,7 +100,7 @@ export function TraceChart() {
           const ticks = sc.ticks(4).map((v) => +v.toFixed(2))
           return (
             <g key={ln.key}>
-              <text x={L} y={ln.y - 8} fontSize="11.5" fontWeight="500" style={{ fill: 'var(--ink-2)' }}>{ln.label} <tspan style={{ fill: 'var(--muted)' }} fontWeight="400">{ln.unit}</tspan></text>
+              <text x={L} y={ln.y - 8} fontSize="12" fontWeight="500" style={{ fill: 'var(--ink)' }}>{ln.label} <tspan style={{ fill: 'var(--muted)' }} fontWeight="400">{ln.unit}</tspan></text>
               {ticks.map((v) => (
                 <g key={v}>
                   <line x1={L} x2={R} y1={y(v)} y2={y(v)} style={{ stroke: 'var(--line)' }} strokeDasharray={Math.abs(v - lo) < 1e-9 ? '' : '2 4'} />
@@ -117,10 +117,10 @@ export function TraceChart() {
                 })
                 return (
                   <>
-                    <polygon points={[...up, ...dn].join(' ')} style={{ fill: 'var(--accent)' }} opacity=".08" />
+                    <polygon points={[...up, ...dn].join(' ')} style={{ fill: 'var(--ink)' }} opacity=".07" />
                     <path d={path(ks, ks.map((k) => E.OUT[k][i].exp[key]), x, y)} fill="none" style={{ stroke: 'var(--muted)' }} strokeWidth="1.2" strokeDasharray="3 4" />
-                    <path d={path(ks, raw(key), x, y)} fill="none" style={{ stroke: 'var(--ink)' }} strokeWidth="1.8" strokeLinejoin="round" />
-                    <path d={path(ks, cleanVals, x, y)} fill="none" style={{ stroke: 'var(--accent)' }} strokeWidth="2.2" strokeDasharray="5 3" />
+                    <path d={path(ks, raw(key), x, y)} fill="none" style={{ stroke: 'var(--ink)' }} strokeWidth="1.4" strokeLinejoin="round" />
+                    <path d={path(ks, cleanVals, x, y)} fill="none" style={{ stroke: 'var(--accent)' }} strokeWidth="1.8" strokeDasharray="5 3" />
                     {ks.map((k) => {
                       const d = E.OUT[k][i], o = E.RAW[k][i]
                       const hit = o && isFault(d.cls) && ((key === 'T' && ['FLATLINE', 'SPIKE', 'ELECTRICAL'].includes(d.cls)) || (key === 'RH' && ['DRIFT', 'ELECTRICAL'].includes(d.cls)))
@@ -131,8 +131,8 @@ export function TraceChart() {
               })()}
               {ln.key === 'R' && (
                 <>
-                  {ks.map((k) => { const o = E.RAW[k][i]; return o && o.R > 0.02 ? <rect key={k} x={x(k) - cw * 0.35} y={y(o.R)} width={cw * 0.7} height={y(lo) - y(o.R)} rx="1.5" style={{ fill: 'var(--accent)' }} opacity=".75" /> : null })}
-                  <path d={path(ks, ks.map((k) => E.OUT[k][i].ctx.radarR), x, y)} fill="none" style={{ stroke: 'var(--storm)' }} strokeWidth="1.8" />
+                  {ks.map((k) => { const o = E.RAW[k][i]; return o && o.R > 0.02 ? <rect key={k} x={x(k) - cw * 0.35} y={y(o.R)} width={cw * 0.7} height={y(lo) - y(o.R)} rx="1.5" style={{ fill: 'var(--ink-2)' }} opacity=".45" /> : null })}
+                  <path d={path(ks, ks.map((k) => E.OUT[k][i].ctx.radarR), x, y)} fill="none" style={{ stroke: 'var(--accent)' }} strokeWidth="1.4" />
                   {!narrow && <text x={R} y={ln.y - 8} textAnchor="end" fontSize="10.5" style={{ fill: 'var(--muted)' }}>bars: gauge · line: radar estimate</text>}
                 </>
               )}
@@ -140,7 +140,7 @@ export function TraceChart() {
                 <>
                   <rect x={L} y={y(11.6)} width={WD} height={Math.max(0, y(lo) - y(11.6))} style={{ fill: 'var(--power)' }} opacity=".08" />
                   <line x1={L} x2={R} y1={y(11.6)} y2={y(11.6)} style={{ stroke: 'var(--power)' }} strokeDasharray="3 3" />
-                  <path d={path(ks, raw('V'), x, y)} fill="none" style={{ stroke: 'var(--warn)' }} strokeWidth="1.8" />
+                  <path d={path(ks, raw('V'), x, y)} fill="none" style={{ stroke: 'var(--ink)' }} strokeWidth="1.4" />
                 </>
               )}
             </g>

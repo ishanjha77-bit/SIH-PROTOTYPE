@@ -11,12 +11,17 @@ const COAST: [number, number][] = [[72.62, 20.35], [72.7, 19.95], [72.78, 19.55]
 const GHATS: [number, number][] = [[73.55, 20.35], [73.55, 19.8], [73.45, 19.3], [73.4, 18.8], [73.55, 18.3], [73.66, 17.9], [73.75, 17.4], [73.85, 16.9], [73.92, 16.2]]
 const pts = (a: [number, number][]) => a.map(([x, y]) => `${PX(x).toFixed(1)},${PY(y).toFixed(1)}`).join(' ')
 
-// Conventional radar reflectivity ramp (what forecasters expect): green → yellow → orange → red → magenta.
-const STOPS: [number, number[]][] = [
-  [18, [60, 190, 140, 0]], [24, [60, 190, 140, 35]], [30, [70, 190, 90, 80]], [36, [150, 205, 60, 150]],
-  [42, [240, 210, 60, 205]], [48, [245, 150, 50, 220]], [54, [235, 70, 60, 230]], [60, [200, 60, 170, 235]],
+// Single-hue reflectivity ramp: heavier rain is deeper ink-blue. Tuned per theme so it reads on paper and on black.
+const LIGHT: [number, number[]][] = [
+  [18, [70, 100, 210, 0]], [24, [70, 100, 210, 16]], [32, [60, 90, 205, 40]], [40, [50, 80, 200, 72]],
+  [48, [40, 66, 190, 110]], [55, [30, 50, 165, 150]], [60, [22, 34, 130, 180]],
+]
+const DARK: [number, number[]][] = [
+  [18, [120, 145, 255, 0]], [24, [120, 145, 255, 22]], [32, [125, 150, 255, 55]], [40, [140, 162, 255, 100]],
+  [48, [165, 184, 255, 150]], [55, [200, 212, 255, 190]], [60, [235, 240, 255, 215]],
 ]
 function ramp(z: number) {
+  const STOPS = document.documentElement.classList.contains('dark') ? DARK : LIGHT
   if (z < STOPS[0][0]) return null
   for (let s = 1; s < STOPS.length; s++) if (z <= STOPS[s][0]) {
     const [z0, c0] = STOPS[s - 1], [z1, c1] = STOPS[s], t = (z - z0) / (z1 - z0)
@@ -61,32 +66,32 @@ export function drawRadar(cv: HTMLCanvasElement, k: number, latOf: (y: number, h
 }
 
 export function NetworkMap() {
-  const { engine, k, sel, select } = useConsole()
+  const { engine, k, sel, select, theme } = useConsole()
   const canvas = useRef<HTMLCanvasElement>(null)
 
   useEffect(() => {
     const cv = canvas.current; if (!cv) return
     drawRadar(cv, k, (y, h) => 20.3 - (((y + 0.5) * VH) / h - 24) / 222, (x, w) => 72.45 + (((x + 0.5) * VW) / w - 24) / 222)
-  }, [k])
+  }, [k, theme])
 
   return (
-    <div className="relative mx-auto w-full max-w-[460px]" style={{ aspectRatio: `${VW}/${VH}` }}>
+    <div className="relative w-full" style={{ aspectRatio: `${VW}/${VH}` }}>
       <svg viewBox={`0 0 ${VW} ${VH}`} className="absolute inset-0 h-full w-full" aria-hidden="true">
-        <rect width={VW} height={VH} rx="22" style={{ fill: 'var(--land)' }} />
+        <rect width={VW} height={VH} rx="4" style={{ fill: 'var(--land)' }} />
         <polygon points={`0,0 ${PX(72.62)},0 ${pts(COAST)} ${PX(73.52)},${VH} 0,${VH}`} style={{ fill: 'var(--sea)' }} />
-        <polyline points={pts(COAST)} fill="none" style={{ stroke: 'var(--line-strong)' }} strokeWidth="1.2" />
+        <polyline points={pts(COAST)} fill="none" style={{ stroke: 'var(--line-strong)' }} strokeWidth="1" />
         <polyline points={pts(GHATS)} fill="none" style={{ stroke: 'var(--line-strong)' }} strokeWidth="1.4" strokeDasharray="1 7" strokeLinecap="round" />
         {[17, 18, 19, 20].map((lat) => (
           <g key={lat}>
             <line x1="0" x2={VW} y1={PY(lat)} y2={PY(lat)} style={{ stroke: 'var(--line)' }} strokeDasharray="2 6" />
-            <text x={VW - 12} y={PY(lat) - 5} textAnchor="end" fontSize="10" style={{ fill: 'var(--muted)' }} fontFamily="Geist Mono, monospace">{lat}°N</text>
+            <text x={VW - 12} y={PY(lat) - 5} textAnchor="end" fontSize="11" style={{ fill: 'var(--muted)' }}>{lat}°N</text>
           </g>
         ))}
-        <text x={32} y={PY(17.7)} fontSize="12" letterSpacing="4" style={{ fill: 'var(--muted)' }} opacity=".7">ARABIAN SEA</text>
-        <text x={PX(73.98)} y={PY(16.5)} fontSize="9.5" letterSpacing="2.5" style={{ fill: 'var(--muted)' }} opacity=".75" transform={`rotate(-74 ${PX(73.98)} ${PY(16.5)})`}>WESTERN GHATS</text>
+        <text x={32} y={PY(17.7)} fontSize="13" fontStyle="italic" style={{ fill: 'var(--muted)' }}>Arabian Sea</text>
+        <text x={PX(73.98)} y={PY(16.5)} fontSize="12" fontStyle="italic" style={{ fill: 'var(--muted)' }} transform={`rotate(-74 ${PX(73.98)} ${PY(16.5)})`}>Western Ghats</text>
       </svg>
-      <div className="absolute inset-0 overflow-hidden rounded-[22px]">
-        <canvas ref={canvas} width={232} height={344} className="h-full w-full" style={{ opacity: 0.85, filter: 'blur(1.5px)' }} />
+      <div className="absolute inset-0 overflow-hidden rounded-[4px]">
+        <canvas ref={canvas} width={232} height={344} className="h-full w-full" style={{ filter: 'blur(1.5px)' }} />
       </div>
       <svg viewBox={`0 0 ${VW} ${VH}`} className="absolute inset-0 h-full w-full" role="img" aria-label="Station map with live radar">
         {STATIONS.map((s, i) => {
@@ -96,12 +101,12 @@ export function NetworkMap() {
           return (
             <g key={s.id} role="button" tabIndex={0} aria-label={`${s.name}: ${st.label}`} className="cursor-pointer outline-none"
               onClick={() => select(i)} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); select(i) } }}>
-              {i === sel && <circle cx={x} cy={y} r="17" fill="none" style={{ stroke: 'var(--accent)' }} strokeWidth="2" opacity=".9" />}
-              {legacyFalse && <circle cx={x} cy={y} r="12" fill="none" style={{ stroke: 'var(--fault)' }} strokeWidth="1.3" strokeDasharray="2 2.5" />}
-              <circle cx={x} cy={y} r="8" style={{ fill: TONE[st.tone].hex, stroke: 'var(--surface)' }} strokeWidth="3" />
-              <text x={left ? x - 16 : x + 16} y={y + 4} textAnchor={left ? 'end' : 'start'} fontSize="13" fontWeight="500"
+              {i === sel && <circle cx={x} cy={y} r="14" fill="none" style={{ stroke: 'var(--ink)' }} strokeWidth="1.5" />}
+              {legacyFalse && <circle cx={x} cy={y} r="10" fill="none" style={{ stroke: 'var(--fault)' }} strokeWidth="1.2" strokeDasharray="2 2.5" />}
+              <circle cx={x} cy={y} r="6" style={{ fill: st.tone === 'ok' ? 'var(--ink-2)' : TONE[st.tone].hex, stroke: 'var(--land)' }} strokeWidth="2.5" />
+              <text x={left ? x - 14 : x + 14} y={y + 4} textAnchor={left ? 'end' : 'start'} fontSize="14" fontWeight="500"
                 style={{ fill: 'var(--ink)', stroke: 'var(--land)', paintOrder: 'stroke' }} strokeWidth="4" strokeLinejoin="round">{s.name.split(' ')[0]}</text>
-              <text x={left ? x - 16 : x + 16} y={y + 18} textAnchor={left ? 'end' : 'start'} fontSize="10.5" fontFamily="Geist Mono, monospace"
+              <text x={left ? x - 14 : x + 14} y={y + 19} textAnchor={left ? 'end' : 'start'} fontSize="11.5"
                 style={{ fill: 'var(--muted)', stroke: 'var(--land)', paintOrder: 'stroke' }} strokeWidth="3">{s.elev} m</text>
             </g>
           )
@@ -112,12 +117,12 @@ export function NetworkMap() {
 }
 
 export function MapLegend() {
-  const items: [string, string][] = [['Valid', 'var(--ok)'], ['Severe weather', 'var(--storm)'], ['Sensor fault', 'var(--fault)'], ['Power', 'var(--power)'], ['Warning', 'var(--warn)']]
+  const items: [string, string][] = [['Valid', 'var(--ink-2)'], ['Severe weather', 'var(--storm)'], ['Sensor fault', 'var(--fault)'], ['Power', 'var(--power)'], ['Warning', 'var(--warn)']]
   return (
-    <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-[12px] text-ink-2">
-      {items.map(([l, c]) => <span key={l} className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-full" style={{ background: c }} />{l}</span>)}
-      <span className="inline-flex items-center gap-1.5"><span className="h-3 w-3 rounded-full border border-dashed" style={{ borderColor: 'var(--fault)' }} />Legacy false alarm</span>
-      <span className="inline-flex items-center gap-2"><span className="h-1.5 w-16 rounded-full" style={{ background: 'linear-gradient(90deg,rgb(60 190 140/.5),rgb(70 190 90),rgb(240 210 60),rgb(245 150 50),rgb(235 70 60),rgb(200 60 170))' }} />Radar 20–60 dBZ</span>
+    <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-[12.5px] text-muted">
+      {items.map(([l, c]) => <span key={l} className="inline-flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full" style={{ background: c }} />{l}</span>)}
+      <span className="inline-flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full border border-dashed" style={{ borderColor: 'var(--fault)' }} />Legacy false alarm</span>
+      <span className="inline-flex items-center gap-2"><span className="h-1 w-14" style={{ background: 'linear-gradient(90deg, color-mix(in srgb, var(--accent) 10%, transparent), var(--accent))' }} />Radar 20–60 dBZ</span>
     </div>
   )
 }

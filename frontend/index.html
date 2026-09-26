@@ -8,6 +8,11 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300..700&family=Geist+Mono:wght@400..600&display=swap" />
+    <style>html.intro-hold,html.intro-hold body{background:#0d0d0e}</style>
+    <script>
+      // Opening sequence: hold the app under the intro from the very first paint (skip with ?intro=0).
+      try { if (!/[?&]intro=0\b/.test(location.search)) document.documentElement.classList.add('intro-hold') } catch (e) {}
+    </script>
     <script>
       try {
         var t = null; try { t = localStorage.getItem('wg-theme'); } catch (e) {}

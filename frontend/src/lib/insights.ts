@@ -191,3 +191,37 @@ export function workOrderId(E: EngineResult, i: number) {
   const fi = E.faults.findIndex((f) => stationIndex(f.st) === i)
   return fi < 0 ? null : `WO-${String(2601 + fi).padStart(5, '0')}`
 }
+
+/**
+ * One real observation where legacy QC and WeatherGuard disagree, for the overview's side-by-side.
+ * Prefers the latest storm reading legacy QC rejected; otherwise a current fault legacy QC accepted.
+ */
+export interface Disagreement {
+  kind: 'storm' | 'fault'
+  i: number
+  q: number
+  legacy: string
+  wg: string
+  detail: string
+}
+export function disagreement(E: EngineResult, k: number): Disagreement | null {
+  for (let q = k; q >= Math.max(0, k - 96); q--) for (let i = 0; i < N; i++) {
+    const d = E.OUT[q][i], o = E.RAW[q][i], leg = E.LEG[q][i]
+    if (d.cls !== 'SEVERE' || !leg.flag || !o) continue
+    return {
+      kind: 'storm', i, q, legacy: leg.why,
+      wg: `Radar ${d.ctx.maxDbz.toFixed(0)} dBZ and INSAT cloud-top ${d.ctx.ctt.toFixed(0)} °C show a squall over the station`,
+      detail: `T ${o.T.toFixed(1)} °C (${d.dT >= 0 ? '+' : ''}${d.dT.toFixed(1)} in 15 min) · wind ${o.W.toFixed(1)} m/s · rain ${o.R.toFixed(1)} mm`,
+    }
+  }
+  for (let i = 0; i < N; i++) {
+    const d = E.OUT[k][i], o = E.RAW[k][i]
+    if (!isFault(d.cls) || E.LEG[k][i].flag || !o) continue
+    return {
+      kind: 'fault', i, q: k, legacy: 'Passed range, step and persistence checks',
+      wg: `Off by ${Math.abs(o.RH - d.exp.RH) > 3 ? `${(o.RH - d.exp.RH).toFixed(1)}% RH` : `${(o.T - d.exp.T).toFixed(1)} °C`} from what neighbours and terrain predict`,
+      detail: `T ${o.T.toFixed(1)} °C · RH ${o.RH.toFixed(1)}% · wind ${o.W.toFixed(1)} m/s`,
+    }
+  }
+  return null
+}

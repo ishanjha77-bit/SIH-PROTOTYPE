@@ -33,10 +33,10 @@ const ICON: Record<Kind, ReactNode> = {
 export function Toaster() {
   const list = useSyncExternalStore((f) => { subs.add(f); return () => { subs.delete(f) } }, () => items)
   return (
-    <div aria-live="polite" className="pointer-events-none fixed inset-x-3 top-3 z-[60] flex flex-col items-center gap-2 sm:inset-x-auto sm:right-5 sm:top-5 sm:items-end">
+    <div aria-live="polite" className="pointer-events-none fixed inset-x-3 top-[68px] z-[60] flex flex-col items-center gap-2 sm:inset-x-auto sm:right-8 sm:items-end">
       {list.map((t) => (
         <div key={t.id} role="status"
-          className="rise pointer-events-auto flex w-full max-w-[380px] items-start gap-3 rounded-xl border border-line bg-surface px-4 py-3 shadow-lift">
+          className="rise pointer-events-auto flex w-full max-w-[380px] items-start gap-3 rounded-md border border-line bg-bg px-4 py-3.5 shadow-lift">
           <span className="mt-0.5">{ICON[t.kind]}</span>
           <div className="min-w-0 flex-1">
             <div className="text-[13px] font-medium text-ink">{t.title}</div>
