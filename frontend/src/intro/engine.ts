@@ -16,11 +16,11 @@ interface Timeline {
   grow0: number; grow1: number; complex1: number; collapse0: number; collapse1: number
   ring: number; textIn: number; textOut: number; dissolve0: number; dissolve1: number; end: number
 }
-// Everything appears together at 0.3 s and stays still and readable until 12.9 s. The network grows slowly
+// Everything appears together at 0.3 s and stays still and readable for 6.5 s (until 6.8 s). The network grows
 // behind the text as a dimmed backdrop; it only converges as part of the single final exit.
 const FULL: Timeline = {
-  grow0: 300, grow1: 3300, complex1: 5000, collapse0: 12950, collapse1: 13900,
-  ring: 500, textIn: 300, textOut: 12900, dissolve0: 12950, dissolve1: 13900, end: 14250,
+  grow0: 300, grow1: 3000, complex1: 4500, collapse0: 6850, collapse1: 7800,
+  ring: 500, textIn: 300, textOut: 6800, dissolve0: 6850, dissolve1: 7800, end: 8150,
 }
 const SHORT: Timeline = {
   grow0: 0, grow1: 380, complex1: 650, collapse0: 650, collapse1: 1050,
