@@ -11,6 +11,7 @@ import { Drawer, IconButton, Segmented, cx } from './ui'
 
 const NAV: { id: View; label: string }[] = [
   { id: 'overview', label: 'Overview' },
+  { id: 'real', label: 'Real data' },
   { id: 'station', label: 'Diagnosis' },
   { id: 'maintenance', label: 'Maintenance' },
   { id: 'lab', label: 'Fault lab' },
@@ -82,7 +83,8 @@ export function TopNav() {
 
         <div className="ml-auto flex items-center gap-5">
           <span className="hidden whitespace-nowrap 2xl:inline-flex"><EngineStatus /></span>
-          <span className="hidden sm:inline-flex"><Clock /></span>
+          {/* the replay clock gives way to the nav links between 1024 and 1279 px */}
+          {view !== 'real' && <span className="hidden sm:inline-flex lg:hidden xl:inline-flex"><Clock /></span>}
           <button type="button" onClick={() => setTour(0)}
             className="hidden h-8 items-center gap-2 whitespace-nowrap rounded-md border border-ink/80 px-3 text-[13.5px] font-medium text-ink transition-colors duration-150 hover:bg-ink hover:text-bg lg:inline-flex">
             {!tourSeen && <span className="breathe h-1.5 w-1.5 rounded-full bg-accent" aria-hidden="true" />}
@@ -166,11 +168,15 @@ export function TimelineDock() {
 
 /** Quiet footer: provenance, and the intro for anyone who wants to see it again. */
 export function Footer() {
+  const { view } = useConsole()
   return (
     <footer className="mt-24 flex flex-wrap items-baseline justify-between gap-x-8 gap-y-3 border-t border-line pt-6 text-[12.5px] text-muted">
       <p className="max-w-[80ch]">
-        Prototype for Smart India Hackathon 2026 · Team Nex_GenX. Observations come from a deterministic simulator of the
-        Konkan–Western Ghats network with faults injected at known times. All checks use past and present data only.
+        Prototype for Smart India Hackathon 2026 · Team Nex_GenX.{' '}
+        {view === 'real'
+          ? 'This page shows real 2023 SYNOP observations from IMD stations, via NOAA ISD. Every other page uses a deterministic simulator of the same network with faults injected at known times.'
+          : 'Observations on this page come from a deterministic simulator of the Konkan–Western Ghats network with faults injected at known times. The Real data page runs the same checks on real observations.'}
+        {' '}All checks use past and present data only.
       </p>
       <button type="button" onClick={intro.replay} className="text-ink-2 transition-colors hover:text-ink">Replay intro</button>
     </footer>

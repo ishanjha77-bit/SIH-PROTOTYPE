@@ -8,6 +8,7 @@ import { Overview } from './views/Overview'
 import { PageSkeleton } from './components/ui'
 
 // Secondary screens load on demand; the overview (first paint) stays in the main bundle.
+const RealData = lazy(() => import('./views/RealData').then((m) => ({ default: m.RealData })))
 const Station = lazy(() => import('./views/Station').then((m) => ({ default: m.Station })))
 const Evaluation = lazy(() => import('./views/Others').then((m) => ({ default: m.Evaluation })))
 const Maintenance = lazy(() => import('./views/Others').then((m) => ({ default: m.Maintenance })))
@@ -16,6 +17,7 @@ const Architecture = lazy(() => import('./views/Others').then((m) => ({ default:
 
 const COPY: Record<View, { title?: string; subtitle?: string }> = {
   overview: {},
+  real: { title: 'Real data', subtitle: 'The same checks on a full year of real observations from these stations, compared with the rule-based QC in use today.' },
   station: { title: 'Diagnosis', subtitle: 'Why one observation was accepted, kept as severe weather, or replaced, check by check.' },
   evaluation: { title: 'Evaluation', subtitle: 'Every flag scored against faults injected at known times, beside legacy rule-based QC.' },
   maintenance: { title: 'Maintenance', subtitle: 'Work orders raised automatically, with the root cause and the parts to carry.' },
@@ -50,6 +52,7 @@ function Screen() {
           <div key={view} className="fade-in">
             <Suspense fallback={<PageSkeleton />}>
             {view === 'overview' && <Overview />}
+            {view === 'real' && <RealData />}
             {view === 'station' && <Station />}
             {view === 'evaluation' && <Evaluation />}
             {view === 'maintenance' && <Maintenance />}
@@ -60,7 +63,7 @@ function Screen() {
           <Footer />
         </div>
       </main>
-      {view !== 'architecture' && <TimelineDock />}
+      {view !== 'architecture' && view !== 'real' && <TimelineDock />}
       <Tour />
       <Toaster />
       <BackendWatcher />

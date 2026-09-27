@@ -1,4 +1,4 @@
-# WeatherGuard AI — Console (frontend)
+# WeatherGuard — Console (frontend)
 
 React 19 + TypeScript + Tailwind CSS v4 + Vite. SIH 2026 · Team Nex_GenX.
 
@@ -6,38 +6,45 @@ React 19 + TypeScript + Tailwind CSS v4 + Vite. SIH 2026 · Team Nex_GenX.
 
 ```bash
 npm install
-npm run dev          # http://localhost:5173
+npm run dev          # http://localhost:5173  (add ?intro=0 to skip the opening sequence)
 npm run build        # production build → dist/
-npm run build:single # one self-contained HTML → dist-single/index.html (easy to share offline)
+npm run build:single # one self-contained HTML → dist-single/index.html (simulation only; no Real data page)
 ```
+
+## Pages
+
+| Page | What it shows |
+|---|---|
+| Overview | The command centre: live network, fault simulator, stage-by-stage validation, decision, why, impact |
+| Real data | The same checks on 18,020 real 2023 IMD observations (NOAA ISD), compared with NOAA's own QC flags |
+| Diagnosis | One observation, check by check, with a 24-hour trace |
+| Maintenance | Shift report, work orders, clean-data export |
+| Fault lab | Inject any of seven faults at any station |
+| Evaluation | Recall, precision, false alarms, latency, and benchmarks against Isolation Forest, LOF, One-Class SVM |
+| Architecture | The five tiers, the live model card, and the backend contract |
 
 ## Structure
 
 ```
 src/
-  engine/        detection engine (simulator, 5-gate QC pipeline, legacy QC, scoring)
-    types.ts     data contract shared with the future FastAPI backend
-    engine.ts    runEngine(faults) → observations + verdicts
-  state/         ConsoleProvider: timeline, playback, selection, fault injection, theme
-  components/    Shell (sidebar, top bar, timeline dock), NetworkMap, TraceChart, Blocks, ui
-  views/         Overview, Station (diagnosis), Evaluation, Maintenance, Fault lab, Architecture
-  lib/present.ts labels, colours, narratives, work-order templates
+  engine/        in-browser reference engine (simulator, five-gate pipeline, legacy QC, scoring)
+  state/         ConsoleProvider: replay clock, selection, fault injection, backend detection, theme
+  intro/         opening sequence (Canvas 2D), variant store, staggered reveal, count-up
+  components/    Shell (top nav, replay strip, footer), CommandCenter, Insights, NetworkMap, TraceChart, Mark, ui
+  views/         Overview, RealData, Station (Diagnosis), Others (Evaluation, Maintenance, Fault lab, Architecture)
+  lib/           present (labels, narratives), insights (findings), investigate (simulator walkthrough), realdata
+public/realdata/ konkan-2023.json, written by backend/app/realdata/build.py
 ```
 
 ## Design system
 
-Tokens live in `src/index.css` as CSS variables (light "mist" palette + dark mode via the `.dark` class)
-and are exposed to Tailwind through `@theme inline` — e.g. `bg-surface`, `text-ink-2`, `bg-storm-soft`.
-Fonts: Geist and Geist Mono.
+Tokens live in `src/index.css` as CSS variables: a paper-and-ink palette for light and dark themes, one ink-blue
+accent, and muted status colours (ok, severe weather, fault, power, warning, offline). They are exposed to
+Tailwind through `@theme inline` (`bg-surface`, `text-ink-2`, …). Type scale: `t-display`, `t-headline`, `t-h1`,
+`t-h2`, `t-h3`, `t-lead`, `t-body`, `t-small`, `t-caption`, `t-figure`. Font: Geist.
 
-## Backend swap point
+## Backend
 
-`src/state/console.tsx` fetches from the FastAPI service via `src/api/client.ts`,
-falling back to `runEngine(faults)` in the browser. Shapes are defined in `src/engine/types.ts`.
-
-## Connecting to the backend
-
-The console auto-detects the FastAPI backend at `VITE_API_URL` (default `http://localhost:8000`).
-When it is online, every run goes through `POST /api/v1/run` and the LSTM-autoencoder; the sidebar
-shows "FastAPI · LSTM-autoencoder". If the backend is down, the console silently uses the in-browser
-TypeScript engine, so the demo never breaks. Use the Server / Browser switch in the sidebar to compare.
+The console auto-detects the FastAPI backend at `VITE_API_URL` (default `http://localhost:8000` in dev, same
+origin in production) and falls back to the in-browser engine if it is unreachable. The nav shows which engine
+produced what is on screen. Shapes are defined in `src/engine/types.ts` and `src/api/client.ts`.

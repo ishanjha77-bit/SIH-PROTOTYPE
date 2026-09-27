@@ -43,6 +43,10 @@ export function CommandHeader() {
           <TourCTA />
           <span className="t-small text-muted">or pick a station and simulate a fault below</span>
         </div>
+        <a href="#real" className="t-small mt-5 inline-flex items-center gap-1.5 text-ink-2 hover:text-ink">
+          <span className="rounded-[3px] border border-ink/60 px-1.5 py-px text-[11.5px] text-ink">Real data</span>
+          Also run on a full year of real observations from these stations <ArrowRight size={13} />
+        </a>
       </div>
       <dl className="grid grid-cols-2 self-end border-t border-line sm:grid-cols-4 lg:col-span-6">
         {kpis.map(([label, value, cls], n) => (

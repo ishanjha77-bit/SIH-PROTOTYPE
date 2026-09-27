@@ -3,8 +3,8 @@ import { DEFAULT_FAULTS, STEPS, runEngine, stationIndex, type EngineResult } fro
 import type { Fault, FaultType } from '../engine/types'
 import { API_URL, api, type ModelCard } from '../api/client'
 
-export type View = 'overview' | 'station' | 'evaluation' | 'maintenance' | 'lab' | 'architecture'
-export const VIEWS: View[] = ['overview', 'station', 'evaluation', 'maintenance', 'lab', 'architecture']
+export type View = 'overview' | 'real' | 'station' | 'evaluation' | 'maintenance' | 'lab' | 'architecture'
+export const VIEWS: View[] = ['overview', 'real', 'station', 'evaluation', 'maintenance', 'lab', 'architecture']
 
 interface ConsoleState {
   engine: EngineResult
