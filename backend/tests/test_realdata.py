@@ -80,3 +80,22 @@ def test_frozen_reading_while_neighbours_move_is_stuck():
     v = qc.run(net)["a"]
     assert v[T0 + (start + 7) * STEP].cls == "STUCK"
     assert v[T0 + (start + 2) * STEP].cls != "STUCK"  # needs 18 h of evidence first
+
+
+def test_real_stgnn_never_sees_the_station_it_predicts():
+    """Changing a station's own reading must not change its own prediction (no leakage), only its neighbours'."""
+    import torch
+    from app.realdata.gnn_real import RealSTGNN, graph
+
+    net = network(days=1)
+    keys = list(net)
+    static, edge = graph(net, keys)
+    torch.manual_seed(0)
+    model = RealSTGNN(static, edge).eval()
+    B, N = 1, len(keys)
+    x = torch.randn(B, N, 2); prev = torch.randn(B, N, 2); m = torch.ones(B, N, 2); tf = torch.randn(B, 4)
+    base = model(x, prev, m, tf)
+    x2 = x.clone(); x2[0, 0] += 25.0; prev2 = prev.clone(); prev2[0, 0] += 25.0   # station 0 goes wild
+    moved = model(x2, prev2, m, tf)
+    assert torch.allclose(base[0, 0], moved[0, 0], atol=1e-5)
+    assert not torch.allclose(base[0, 1:], moved[0, 1:], atol=1e-3)

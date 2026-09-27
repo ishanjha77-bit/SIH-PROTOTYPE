@@ -20,9 +20,15 @@ OUT_DIR = Path(__file__).resolve().parents[3] / "frontend" / "public" / "realdat
 CODE = {c: n for n, c in enumerate(qc.CLASSES)}  # class → small int for the series
 
 
+GNN_REAL = Path(__file__).resolve().parents[2] / "models" / "st_gnn_real.json"
+
+
 def build(year: int) -> dict:
     stations = isd.load(year)
-    verdicts = qc.run(stations)
+    gnn = json.loads(GNN_REAL.read_text()) if GNN_REAL.exists() else None
+    if gnn and gnn.get("year") != year:
+        gnn = None
+    verdicts = qc.run(stations, gnn["expected"] if gnn else None)
 
     counts: Counter[str] = Counter()
     both = noaa_only = wg_only = noaa_total = noaa_kept = weather_noaa = 0
@@ -101,6 +107,7 @@ def build(year: int) -> dict:
             "noaaOnlyWithinZ2": round(sum(z < 2 for z in noaa_only_z) / len(noaa_only_z), 3) if noaa_only_z else None,
         },
         "showcase": showcase,
+        "model": None if not gnn else {k: gnn[k] for k in ("name", "scheme", "evaluated_readings", "metrics", "params", "epochs")},
         "t0": t0.isoformat(), "stepHours": 3, "series": series,
     }
 

@@ -17,7 +17,7 @@ It uses about 150 MB of RAM and fits free hosting tiers.
 2. Sign in at render.com with GitHub → **New → Blueprint** → select the repo → **Apply**.
    Render reads `render.yaml`, builds the Dockerfile (about 5 minutes the first time) and gives you
    `https://weatherguard-ai-xxxx.onrender.com`.
-3. Open the link, check the sidebar says **FastAPI · ST-GNN + LSTM-AE**, and paste it on the portal.
+3. Open the link and check that the Overview header says **FastAPI server** (and that the **Real data** page loads), then paste it on the portal.
 
 Free-plan notes:
 - The service sleeps after 15 minutes without traffic and takes about a minute to wake.
@@ -29,8 +29,9 @@ Free-plan notes:
 
 ## Option B — Static site only (always on, zero cold start)
 
-The console includes a full TypeScript copy of the pipeline (identical results, inverse-distance
-instead of ST-GNN), so it works with no server at all.
+The console includes a TypeScript copy of the pipeline, so it works with no server at all. It uses simpler
+models (inverse-distance and PCA instead of the ST-GNN and LSTM autoencoder), so some scores differ from the server's.
+The Real data page is a static file and works either way.
 
 - **Netlify:** New site → import the repo → base directory `frontend` (uses `frontend/netlify.toml`).
 - **Vercel:** New project → root directory `frontend` → framework Vite (uses `frontend/vercel.json`).

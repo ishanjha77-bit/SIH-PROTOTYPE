@@ -18,6 +18,10 @@ export interface RealData {
     weatherNoaaFlagged: number; noaaOnlyMedianZ: number | null; noaaOnlyWithinZ2: number | null
   }
   showcase: RealCase[]
+  model: null | {
+    name: string; scheme: string; evaluated_readings: number; params: number; epochs: number
+    metrics: Record<'st_gnn' | 'idw' | 'weighted_median' | 'climatology_plus_median', { rmse: number; mae: number; p95_abs: number }> & { st_gnn_rh: { rmse: number } }
+  }
   t0: string; stepHours: number
   series: Record<string, { T: (number | null)[]; E: (number | null)[]; C: (number | null)[]; N: (0 | 1)[] }>
 }

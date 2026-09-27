@@ -25,7 +25,10 @@ Streaming tier: `docker compose --profile streaming up` (Redpanda + TimescaleDB 
 ## Real data
 
 The same checks also run on a full year of **real** observations: 18,020 three-hourly SYNOP reports from
-11 of the network's IMD stations in 2023, via the NOAA Integrated Surface Database. NOAA's automated QC flagged
-136 readings as suspect; 126 of those are consistent with their neighbours (median 0.79σ), and 7 were real
-thunderstorms, confirmed by cumulonimbus, thunderstorm and rain reports, that WeatherGuard keeps. Rebuild with
-`cd backend && python -m app.realdata.build --year 2023`; the console's **Real data** page shows the results.
+11 of the network's IMD stations in 2023, via the NOAA Integrated Surface Database. The ST-GNN, retrained on these
+real observations with 4-fold cross-fitting (every prediction from a model that never saw that quarter), predicts
+each station from its neighbours with 1.51 °C RMSE, 30% lower than inverse-distance weighting. NOAA's automated QC
+flagged 136 readings as suspect; 127 of those are consistent with their neighbours, and 8 were real thunderstorms,
+confirmed by cumulonimbus, thunderstorm and rain reports, that WeatherGuard keeps. Rebuild with
+`cd backend && python -m app.realdata.gnn_real --year 2023 && python -m app.realdata.build --year 2023` (PyTorch
+needed for the first step); the console's **Real data** page shows the results.

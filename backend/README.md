@@ -30,7 +30,7 @@ Open http://localhost:8000/docs for interactive API docs. Run tests with `pytest
 | `app/ml/model.py`, `train.py` | LSTM-autoencoder (≈10.8k params) on ST-GNN residuals; threshold calibration; ONNX export; Isolation Forest / LOF / One-Class SVM benchmarks. |
 | `app/streaming/` | Kafka/Redpanda bus, TimescaleDB store, station producer and QC worker (in-memory bus + SQLite fallback). |
 | `models/` | `st_gnn.pt/.json`, `lstm_ae.pt/.json/.onnx` (~47 KB), `benchmarks.json`. |
-| `app/realdata/` | Real observations: NOAA ISD download and parsing (`isd.py`), the checks on 3-hourly SYNOP data (`qc.py`), and the dataset the console shows (`build.py`). |
+| `app/realdata/` | Real observations: NOAA ISD download and parsing (`isd.py`), the ST-GNN retrained on them (`gnn_real.py`), the checks on 3-hourly SYNOP data (`qc.py`), and the dataset the console shows (`build.py`). |
 | `tests/` | Pipeline, API and real-data tests. |
 
 ## API
@@ -79,11 +79,12 @@ inverse-distance weighting. See `models/benchmarks.json` for Isolation Forest / 
 ## Honest scope
 
 The main demo is simulated, so its metrics show the pipeline logic works, not field accuracy. `app/realdata/`
-runs the transferable checks (physics, stuck sensor, spike, neighbour consistency, weather evidence from SYNOP
-reports in place of radar) on real 2023 IMD observations from NOAA ISD; real data has no ground truth, so those
-results are inconsistencies, not confirmed faults, and the learned models (trained on simulated 15-minute data)
-are not applied to it yet. The Kafka/TimescaleDB
+runs on real 2023 IMD observations from NOAA ISD: the ST-GNN retrained on them (`gnn_real.py`, 4-fold
+cross-fitting, 1.51 °C RMSE vs 2.14 °C inverse-distance on held-out quarters) supplies each station's expected value,
+and the physics, stuck-sensor, spike and consistency checks run with weather evidence from SYNOP reports in place
+of radar. Real data has no ground truth, so those results are inconsistencies, not confirmed faults. The LSTM
+autoencoder is not applied to it: it models 15-minute sequences and the archive is 3-hourly. The Kafka/TimescaleDB
 adapters use the standard aiokafka/psycopg APIs; the in-memory/SQLite path is covered by tests. Not built:
 WMO BUFR encoding (NetCDF/CSV/JSON are), diffusion-model imputation (the virtual sensor is the ST-GNN),
 and on-device ESP32 firmware (the model is exported to ONNX for it). Next step: retrain the ST-GNN and
-LSTM autoencoder on real station series (IMD AWS at 15-minute resolution, or NOAA MADIS).
+LSTM autoencoder on IMD's 15-minute AWS series (or NOAA MADIS), and add DWR radar as the external check.

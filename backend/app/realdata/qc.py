@@ -85,7 +85,9 @@ def wmedian(pairs: list[tuple[float, float]]) -> float:
     return pairs[-1][0]
 
 
-def run(stations: dict[str, Station]) -> dict[str, dict[datetime, Verdict]]:
+def run(stations: dict[str, Station], learned: dict[str, dict[str, float]] | None = None) -> dict[str, dict[datetime, Verdict]]:
+    """Classify every reading. `learned`, if given, holds out-of-fold ST-GNN expectations per station and ISO time;
+    they replace the robust neighbour estimate wherever available (the robust estimate stays as the fallback)."""
     keys = list(stations)
     clim = {k: climatology(stations[k]) for k in keys}
     dist = {(a, b): km(stations[a], stations[b]) for a in keys for b in keys if a != b}
@@ -105,7 +107,9 @@ def run(stations: dict[str, Station]) -> dict[str, dict[datetime, Verdict]]:
         e_: dict[str, dict[datetime, float]] = {k: {} for k in keys}
         for k in keys:
             for t, o in stations[k].obs.items():
-                e = expected(k, t, excl.get(t, set()))
+                e = learned[k].get(t.isoformat()) if learned and k in learned else None
+                if e is None:
+                    e = expected(k, t, excl.get(t, set()))
                 if e is not None:
                     e_[k][t], r_[k][t] = e, o.T - e  # type: ignore[operator]
         sc = {}

@@ -89,7 +89,7 @@ export function RealData() {
               </div>
             ))}
           </dl>
-          <p className="t-caption mt-6 text-muted">Outlier line {data.thresholds.zOutlier}σ from a robust neighbour estimate. Weather evidence searched within {data.thresholds.weatherRadiusKm} km.</p>
+          <p className="t-caption mt-6 text-muted">Outlier line {data.thresholds.zOutlier}σ from the ST-GNN's neighbour estimate. Weather evidence searched within {data.thresholds.weatherRadiusKm} km.</p>
         </div>
         <ul className="border-t border-line lg:col-span-8">
           {data.showcase.map((c) => (
@@ -111,6 +111,8 @@ export function RealData() {
         </ul>
       </section>
 
+      {data.model && <ModelResult m={data.model} />}
+
       <Explorer ref={explorer} data={data} station={station} setStation={setStation} month={month} setMonth={setMonth} focus={focus} />
 
       <Card>
@@ -118,15 +120,61 @@ export function RealData() {
         <div className="grid gap-x-16 gap-y-6 text-[14px] md:grid-cols-2">
           <ul className="flex flex-col gap-2 text-ink-2">
             <li><span className="text-ink">Real:</span> every observation, every NOAA flag, every thunderstorm and rain report.</li>
-            <li><span className="text-ink">Runs here:</span> the physics, stuck-sensor, spike and neighbour-consistency checks, and weather evidence from station reports in place of radar.</li>
+            <li><span className="text-ink">Runs here:</span> the ST-GNN, retrained on these real observations, as the neighbour estimate; the physics, stuck-sensor, spike and consistency checks; weather evidence from station reports in place of radar.</li>
           </ul>
           <ul className="flex flex-col gap-2 text-ink-2">
             <li><span className="text-ink">Not claimed:</span> real data has no ground truth, so these are inconsistencies, not confirmed faults.</li>
-            <li><span className="text-ink">Not yet applied:</span> the ST-GNN and LSTM autoencoder were trained on simulated 15-minute data. Retraining on real series is the next step. <a href={data.source.url} target="_blank" rel="noreferrer" className="link">Data source <ArrowUpRight size={12} className="inline" /></a></li>
+            <li><span className="text-ink">Not yet applied:</span> the LSTM autoencoder, which models 15-minute sequences; these real reports are 3-hourly. It needs IMD's 15-minute AWS data. <a href={data.source.url} target="_blank" rel="noreferrer" className="link">Data source <ArrowUpRight size={12} className="inline" /></a></li>
           </ul>
         </div>
       </Card>
     </div>
+  )
+}
+
+/* ---------------- The neighbour model, retrained on real data and scored on quarters it never saw ---------------- */
+function ModelResult({ m }: { m: NonNullable<RealData['model']> }) {
+  const rows: [string, string, { rmse: number; mae: number }, boolean][] = [
+    ['ST-GNN, retrained on real data', 'graph attention over the station network', m.metrics.st_gnn, true],
+    ['Inverse-distance average', 'the standard neighbour check', m.metrics.idw, false],
+    ['Station climatology + robust neighbour anomaly', 'strong non-learned estimate', m.metrics.climatology_plus_median, false],
+  ]
+  const max = Math.max(...rows.map((r) => r[2].rmse))
+  const gain = Math.round((1 - m.metrics.st_gnn.rmse / m.metrics.idw.rmse) * 100)
+  return (
+    <section aria-labelledby="model-h" className="grid gap-x-16 gap-y-8 border-t border-line pt-12 lg:grid-cols-12">
+      <div className="lg:col-span-4">
+        <h2 id="model-h" className="t-h1 text-ink">The AI, on real data</h2>
+        <p className="t-small mt-3 text-muted">
+          How well each method predicts a station's real temperature from its neighbours. Every prediction is made by a
+          model that never saw that quarter of the year ({m.evaluated_readings.toLocaleString('en-IN')} readings).
+        </p>
+        <p className="t-figure mt-8 text-[56px] text-ink">{gain}%</p>
+        <p className="t-small mt-2 text-ink-2">lower error than the standard inverse-distance check</p>
+      </div>
+      <div className="lg:col-span-8">
+        <table className="w-full text-[14px]">
+          <thead><tr className="border-b border-line text-left text-[12.5px] text-muted">
+            <th className="pb-3 font-normal">Neighbour estimate</th><th className="hidden pb-3 font-normal sm:table-cell"> </th>
+            <th className="pb-3 text-right font-normal">RMSE</th><th className="pb-3 text-right font-normal">Typical error</th>
+          </tr></thead>
+          <tbody className="tnum">
+            {rows.map(([name, sub, e, us]) => (
+              <tr key={name} className="border-b border-line">
+                <td className="py-3.5 pr-4"><span className={us ? 'font-medium text-ink' : 'text-ink-2'}>{name}</span><span className="t-caption block text-muted">{sub}</span></td>
+                <td className="hidden w-[36%] py-3.5 sm:table-cell"><span className="block h-[3px] bg-line"><span className={cx('block h-[3px]', us ? 'bg-ink' : 'bg-line-strong')} style={{ width: `${(e.rmse / max) * 100}%` }} /></span></td>
+                <td className={cx('py-3.5 text-right', us ? 'font-medium text-ink' : 'text-muted')}>{e.rmse.toFixed(2)} °C</td>
+                <td className={cx('py-3.5 text-right', us ? 'text-ink' : 'text-muted')}>{e.mae.toFixed(2)} °C</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <p className="t-caption mt-4 text-muted">
+          {m.params.toLocaleString('en-IN')} parameters · {m.scheme}. Climatologies for every method come from the training quarters only.
+          The flags on this page use the ST-GNN's prediction as each station's expected value.
+        </p>
+      </div>
+    </section>
   )
 }
 
@@ -176,7 +224,7 @@ function Explorer({ ref, data, station, setStation, month, setMonth, focus }: {
       </div>
       <div className="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-[12.5px] text-ink-2">
         <span className="inline-flex items-center gap-2"><span className="h-px w-5 bg-ink" />Reported</span>
-        <span className="inline-flex items-center gap-2"><span className="w-5 border-t border-dashed border-muted" />Neighbour estimate</span>
+        <span className="inline-flex items-center gap-2"><span className="w-5 border-t border-dashed border-muted" />ST-GNN neighbour estimate</span>
         <span className="inline-flex items-center gap-2"><span className="h-2 w-2 rounded-full bg-storm" />Real weather, kept</span>
         <span className="inline-flex items-center gap-2"><span className="h-2 w-2 rounded-full bg-fault" />Rejected</span>
         <span className="inline-flex items-center gap-2"><span className="h-2 w-2 rounded-full bg-warn" />Review</span>
